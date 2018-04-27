@@ -1,8 +1,8 @@
-" Vim workspace (as in i3wm)
+" Workspace (as in i3wm) for Vim
 " --------------------------
 " File:      workspace.vim
 " Author:    Olzvoi Bayasgalan <olzvoi@gmail.com>
-" Home:      https://github.com/dosimple/vim-workspace
+" Home:      https://github.com/dosimple/workspace.vim
 " Version:   0.1
 " Copyright: Copyright (C) 2018 Olzvoi Bayasgalan
 " License:   VIM License

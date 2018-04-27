@@ -1,12 +1,14 @@
 # workspace.vim
 
-This plugin tries to emulate i3wm workspace.
-Vim tabpages are (ab)used to represent workspaces.
-The main purpose of this plugin is to make large number of
-buffers easily manageable, by dividing them into workspaces.
+The main purpose of this plugin is to make it easier
+to manage large number of buffers by letting the user
+keep them grouped separately in workspaces.
+Similar to i3wm workspaces holding different windows.
 
-
+* Each tabpage represents a workspace.
 * It's like each workspace has it's own buffer list.
+* Workspaces are numbered starting with 1, like tabpages,
+  but a workspace number wouldn't change as other workspaces are opened and closed.
 * Third party buffer switchers should work as is.
 
 ## Usage
