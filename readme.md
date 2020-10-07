@@ -10,12 +10,14 @@ Similar to i3wm workspaces holding different windows.
 * Workspaces are numbered starting with 1, like tabpages,
   but a workspace number wouldn't change as other workspaces are opened and closed.
 * Third party buffer switchers should work as is.
+* The `hidden` option must be on.
 
 ## Usage
 
-* `:WS 1` will switch to workspace `1`.
-* `:WSmv 1` will rename current workspace to `1`.
-* `:ls` will show only those buffers, which belong to the current workspace.
+* `:WS n` will switch to workspace `n` (it is a number).
+* `:WSc [n]` will close current workspace or `n`.
+* `:WSmv n` will rename current workspace to `n` (again a number).
+* `:ls`, `:bn`, `:bp` will only operate on those buffers, which belong to the current workspace.
 * Use your favorite buffer switcher.
 
 ## Useful addition to .vimrc

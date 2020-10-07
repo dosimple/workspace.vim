@@ -1,9 +1,9 @@
 " Workspace (as in i3wm) for Vim
 " --------------------------
 " File:      workspace.vim
-" Author:    Olzvoi Bayasgalan <olzvoi@gmail.com>
+" Author:    Olzvoi Bayasgalan <me@olzvoi.dev>
 " Home:      https://github.com/dosimple/workspace.vim
-" Version:   0.1
+" Version:   0.2
 " Copyright: Copyright (C) 2018 Olzvoi Bayasgalan
 " License:   VIM License
 "
@@ -16,6 +16,10 @@ if v:version < 700
     finish
 endif
 
+" Open the workspace
+"
+" Return:   true - for workspace created new
+"           false - workspace exists
 function! WS_Open(WS)
     if a:WS < 1
         call s:warning("Workspace invalid.")
@@ -27,8 +31,17 @@ function! WS_Open(WS)
     else
         exe WS_Tabnum(a:WS, 1) . "tabnew"
         call WS_Rename(a:WS)
+        call s:bufdummy()
     endif
     echo WS_Line()
+    return ! tabnum
+endfunc
+
+function! WS_Close(WS)
+    let tabnum = WS_Tabnum(a:WS)
+    if tabnum
+        exe "tabclose " . tabnum
+    endif
 endfunc
 
 function! WS_Backforth()
@@ -73,6 +86,19 @@ function! WS_Buffers(WS)
         endif
     endfor
     return bs
+endfunc
+
+function! WS_B_Move(to)
+    let bnr = bufnr("%")
+    let alt = bufnr("#")
+    if alt == -1
+        enew
+        call s:bufdummy()
+    else
+        exe "buffer " . alt
+    endif
+    call WS_Open(a:to)
+    exe "buffer " . bnr
 endfunc
 
 function! WS_Tabnum(WS, ...)
@@ -146,6 +172,14 @@ function! s:tabclosed()
     endfor
 endfunc
 
+function! s:collect_orphans()
+    for b in getbufinfo()
+        if b.listed && ! get(b.variables, "WS")
+            call setbufvar(b.bufnr, "WS", t:WS)
+        endif
+    endfor
+endfunc
+
 function! s:tableave()
     let s:prev = t:WS
     for b in WS_Buffers(t:WS)
@@ -166,22 +200,40 @@ function! s:tabenter()
     endfor
 endfunc
 
+function! s:bufadd(bnr)
+    " setbufvar doesn't work on BufAdd yet.
+    call setbufvar(a:bnr, "WS", t:WS)
+endfunc
+
 function! s:bufenter()
     let b:WS = t:WS
-    if get(b:, "WS_listed")
-        call s:buflisted(bufnr("%"), 1)
+    let bnr = bufnr("%")
+    if getbufvar(bnr, "WS_listed")
+        call s:buflisted(bnr, 1)
     endif
+    " Workaround for BufAdd
+    call s:collect_orphans()
+endfunc
+
+function! s:bufdummy()
+    setl nomodifiable
+    setl nobuflisted
+    setl noswapfile
+    setl bufhidden=wipe
+    "setl buftype=nofile
 endfunc
 
 augroup workspace
     autocmd!
-    autocmd TabEnter * nested call s:tabenter()
-    autocmd TabLeave * nested call s:tableave()
-    autocmd TabClosed * nested call s:tabclosed()
-    autocmd BufEnter * nested call s:bufenter()
+    autocmd TabEnter    * nested call s:tabenter()
+    autocmd TabLeave    * nested call s:tableave()
+    autocmd TabClosed   * nested call s:tabclosed()
+    "autocmd BufAdd     * nested call s:bufadd(expand("<abuf>"))
+    autocmd BufEnter    * nested call s:bufenter()
 augroup end
 
 command! -nargs=1 WS call WS_Open("<args>")
+command! -nargs=1 WSc call WS_Close("<args>")
 command! -nargs=1 WSmv call WS_Rename("<args>")
 
 function! s:init()
