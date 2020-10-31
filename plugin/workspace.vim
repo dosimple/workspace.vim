@@ -235,6 +235,7 @@ augroup end
 command! -nargs=1 WS call WS_Open("<args>")
 command! -nargs=1 WSc call WS_Close("<args>")
 command! -nargs=1 WSmv call WS_Rename("<args>")
+command! -nargs=1 WSbm call WS_B_Move("<args>")
 
 function! s:init()
     for t in range(1, tabpagenr("$"))
