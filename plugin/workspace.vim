@@ -193,11 +193,26 @@ function! s:tabenter()
     if ! get(t:, "WS")
         call s:tabinit()
     endif
-    for b in WS_Buffers(t:WS)
+    let switchbuf = 1
+    let bnr = bufnr("%")
+    let wsbuffers = WS_Buffers(t:WS)
+    for b in wsbuffers 
         if get(b.variables, "WS_listed")
             call s:buflisted(b.bufnr, 1)
+            if(bnr == b.bufnr)
+              let switchbuf = 0
+            endif
         endif
     endfor
+    if(0 == len(WS_Buffers(t:WS)))
+        let switchbuf = 0
+        enew
+        call s:bufdummy()
+    endif
+    if(switchbuf)
+        let b = get(wsbuffers, 0, 0) 
+        exe "buffer " . b.bufnr
+    endif
 endfunc
 
 function! s:bufadd(bnr)
