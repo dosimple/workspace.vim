@@ -225,6 +225,7 @@ function! s:bufenter()
         let tabnum = WS_Tabnum(b:WS)
         if tabnum
             exe "tabnext " . tabnum
+            exe "buffer " . b.bufnr 
         endif
       endif
     endfor
