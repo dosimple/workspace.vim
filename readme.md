@@ -54,7 +54,7 @@ let g:airline#extensions#tabline#show_tab_count = 2
 
 ## changes compare to original
 
--Open existing buffer switch to that buffer.
+-Open existing buffer switch to that tab/buffer.
 -Move tab between working spaces.
 -C-^ move to that tab/buffer
 
