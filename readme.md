@@ -1,6 +1,6 @@
 ## Forked # workspace.vim
 
-forked following project to allow to use tab as workspaces to manage buffers similar to i3/sway
+Forked following (workspace.vim) project to allow to use tab as workspaces to manage buffers similar to i3/sway
 
 my binding are:
 
