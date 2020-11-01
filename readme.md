@@ -1,3 +1,58 @@
+## Forked # workspace.vim
+
+Forked following (workspace.vim) project to allow to use tab as workspaces to manage buffers similar to i3/sway
+
+my binding are:
+
+```vim
+" create a new tab with N title or move to an exiting N tab.
+nnoremap <silent> <leader>1 :WS 1<CR>
+nnoremap <silent> <leader>2 :WS 2<CR>
+nnoremap <silent> <leader>3 :WS 3<CR>
+  .
+  .
+  .
+```
+```vim
+" move current buffer to tab N
+nnoremap <silent> <leader><leader>1 :WSbm 1<CR>
+nnoremap <silent> <leader><leader>2 :WSbm 2<CR>
+nnoremap <silent> <leader><leader>3 :WSbm 3<CR>
+  .
+  .
+  .
+```
+```vim
+" c-^ alternative
+nnoremap <silent> <leader>` :call WS_Backforth()<CR>
+```
+
+
+to move between buffers use :bn :bp or any buffer plugin.
+
+if you are using airline following setting produce best result:
+
+```vim
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#show_tabs = 0
+let g:airline#extensions#tabline#show_tab_count = 2
+```
+
+## Additional Usage. Refer Below for more
+
+* `:WSmb n` will move current buffer to workspace `n` (it is a number).
+
+## Images (Workspace <1> | 2)
+
+![screenshot_2020-11-02-020612](https://user-images.githubusercontent.com/355729/97809539-b9164b80-1cb0-11eb-9e95-7e5837c81133.png)
+
+
+![screenshot_2020-11-02-020637](https://user-images.githubusercontent.com/355729/97809527-aef44d00-1cb0-11eb-908a-a692f29eafd3.png)
+
+
+![screenshot_2020-11-02-020654](https://user-images.githubusercontent.com/355729/97809516-a6037b80-1cb0-11eb-8def-b6aacd4b11e3.png)
+
+
 # workspace.vim
 
 The main purpose of this plugin is to make it easier
