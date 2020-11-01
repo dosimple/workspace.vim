@@ -90,13 +90,6 @@ endfunc
 
 function! WS_B_Move(to)
     let bnr = bufnr("%")
-    let alt = bufnr("#")
-    if alt == -1
-        enew
-        call s:bufdummy()
-    else
-        exe "buffer " . alt
-    endif
     call WS_Open(a:to)
     exe "buffer " . bnr
 endfunc
@@ -194,24 +187,27 @@ function! s:tabenter()
         call s:tabinit()
     endif
     let switchbuf = 1
+    let target = {} 
     let bnr = bufnr("%")
     let wsbuffers = WS_Buffers(t:WS)
     for b in wsbuffers 
         if get(b.variables, "WS_listed")
+            if(empty(target))
+               let target = b 
+            endif
             call s:buflisted(b.bufnr, 1)
             if(bnr == b.bufnr)
               let switchbuf = 0
             endif
         endif
     endfor
-    if(0 == len(WS_Buffers(t:WS)))
+    if(empty(target))
         let switchbuf = 0
         enew
         call s:bufdummy()
     endif
-    if(switchbuf)
-        let b = get(wsbuffers, 0, 0) 
-        exe "buffer " . b.bufnr
+    if(switchbuf && !empty(target))
+        exe "buffer " . target.bufnr 
     endif
 endfunc
 
