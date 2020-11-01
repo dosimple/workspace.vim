@@ -1,3 +1,5 @@
+Added WSbm to move buffers between tabs, and fix for nvim ...
+
 # workspace.vim
 
 The main purpose of this plugin is to make it easier
