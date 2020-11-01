@@ -217,8 +217,19 @@ function! s:bufadd(bnr)
 endfunc
 
 function! s:bufenter()
-    let b:WS = t:WS
     let bnr = bufnr("%")
+    
+    for b in getbufinfo(bnr)
+      if b.listed 
+        let b:WS = get(b.variables, "WS")
+        let tabnum = WS_Tabnum(b:WS)
+        if tabnum
+            exe "tabnext " . tabnum
+        endif
+      endif
+    endfor
+
+    let b:WS = t:WS
     if getbufvar(bnr, "WS_listed")
         call s:buflisted(bnr, 1)
     endif
