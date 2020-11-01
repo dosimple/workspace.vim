@@ -36,6 +36,16 @@ let g:airline#extensions#tabline#show_tab_count = 2
 
 * `:WSmb n` will move current buffer to workspace `n` (it is a number).
 
+## Images (Workspace <1> | 2)
+
+![screenshot_2020-11-02-020612](https://user-images.githubusercontent.com/355729/97809539-b9164b80-1cb0-11eb-9e95-7e5837c81133.png)
+
+
+![screenshot_2020-11-02-020637](https://user-images.githubusercontent.com/355729/97809527-aef44d00-1cb0-11eb-908a-a692f29eafd3.png)
+
+
+![screenshot_2020-11-02-020654](https://user-images.githubusercontent.com/355729/97809516-a6037b80-1cb0-11eb-8def-b6aacd4b11e3.png)
+
 
 # workspace.vim
 
