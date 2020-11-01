@@ -22,6 +22,15 @@ nnoremap <silent> <leader><leader>3 :WSbm 3<CR>
   .
   .
 ```
+to move between buffers use :bn :bp or any buffer plugin.
+
+if you are using airline following setting produce best result:
+
+```vim
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#show_tabs = 0
+let g:airline#extensions#tabline#show_tab_count = 2
+```
 
 ## Additional Usage. Refer Below for more
 
