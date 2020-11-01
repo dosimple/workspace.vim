@@ -22,6 +22,12 @@ nnoremap <silent> <leader><leader>3 :WSbm 3<CR>
   .
   .
 ```
+```vim
+" c-^ alternative
+nnoremap <silent> <leader>` :call WS_Backforth()<CR>
+```
+
+
 to move between buffers use :bn :bp or any buffer plugin.
 
 if you are using airline following setting produce best result:
