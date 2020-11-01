@@ -1,3 +1,30 @@
+## Forked
+
+forked following project to allow to use tab as workspaces to manage buffers similar to i3/sway
+
+my binding are:
+
+" create a new tab with N title or move to an exiting N tab.
+nnoremap <silent> <leader>1 :WS 1<CR>
+nnoremap <silent> <leader>2 :WS 2<CR>
+nnoremap <silent> <leader>3 :WS 3<CR>
+  .
+  .
+  .
+
+" move current buffer to tab N
+nnoremap <silent> <leader><leader>1 :WSbm 1<CR>
+nnoremap <silent> <leader><leader>2 :WSbm 2<CR>
+nnoremap <silent> <leader><leader>3 :WSbm 3<CR>
+  .
+  .
+  .
+  
+## Additional Usage. Refer Below for more
+
+* `:WSmb n` will move current buffer to workspace `n` (it is a number).
+
+
 # workspace.vim
 
 The main purpose of this plugin is to make it easier
