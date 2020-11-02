@@ -54,9 +54,10 @@ let g:airline#extensions#tabline#show_tab_count = 2
 
 ## changes compare to original
 
--Open existing buffer switch to that tab/buffer.
--Move tab between working spaces.
--C-^ move to that tab/buffer
+* Opening an already existing buffer switch to that tab/buffer.
+* Can move tab between working spaces.
+* C-^ switch tab then buffer.
+* Closing tab now move old buffer to previous left tab, if not then first tab.
 
 # workspace.vim
 
