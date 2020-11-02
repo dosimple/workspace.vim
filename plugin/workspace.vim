@@ -90,13 +90,6 @@ endfunc
 
 function! WS_B_Move(to)
     let bnr = bufnr("%")
-    let alt = bufnr("#")
-    if alt == -1
-        enew
-        call s:bufdummy()
-    else
-        exe "buffer " . alt
-    endif
     call WS_Open(a:to)
     exe "buffer " . bnr
 endfunc
@@ -164,10 +157,18 @@ function! s:tabclosed()
     for b in getbufinfo()
         let WS = get(b.variables, "WS")
         if WS && ! WS_Tabnum(WS)
-            if get(b.variables, "WS_listed")
+            " get prev tab
+            let bWS = WS_Tabnum(WS, 1)
+            " if 0 then use first tab
+            if(bWS == 0)
+              let firstTab = gettabinfo()[0]
+              let bWS = get(firstTab.variables, "WS")
+            endif
+            if bWS == t:WS && get(b.variables, "WS_listed")
                 call s:buflisted(b.bufnr, 1)
             endif
-            call setbufvar(b.bufnr, "WS", "")
+            " move buffer to prev tab, or first tab.
+            call setbufvar(b.bufnr, "WS", bWS)
         endif
     endfor
 endfunc
@@ -193,11 +194,29 @@ function! s:tabenter()
     if ! get(t:, "WS")
         call s:tabinit()
     endif
-    for b in WS_Buffers(t:WS)
+    let switchbuf = 1
+    let target = {} 
+    let bnr = bufnr("%")
+    let wsbuffers = WS_Buffers(t:WS)
+    for b in wsbuffers 
         if get(b.variables, "WS_listed")
+            if(empty(target))
+               let target = b 
+            endif
             call s:buflisted(b.bufnr, 1)
+            if(bnr == b.bufnr)
+              let switchbuf = 0
+            endif
         endif
     endfor
+    if(empty(target))
+        let switchbuf = 0
+        enew
+        call s:bufdummy()
+    endif
+    if(switchbuf && !empty(target))
+        exe "buffer " . target.bufnr 
+    endif
 endfunc
 
 function! s:bufadd(bnr)
@@ -206,8 +225,20 @@ function! s:bufadd(bnr)
 endfunc
 
 function! s:bufenter()
-    let b:WS = t:WS
     let bnr = bufnr("%")
+    
+    for b in getbufinfo(bnr)
+      if b.listed 
+        let b:WS = get(b.variables, "WS")
+        let tabnum = WS_Tabnum(b:WS)
+        if tabnum
+            exe "tabnext " . tabnum
+            exe "buffer " . b.bufnr 
+        endif
+      endif
+    endfor
+
+    let b:WS = t:WS
     if getbufvar(bnr, "WS_listed")
         call s:buflisted(bnr, 1)
     endif
@@ -235,6 +266,7 @@ augroup end
 command! -nargs=1 WS call WS_Open("<args>")
 command! -nargs=1 WSc call WS_Close("<args>")
 command! -nargs=1 WSmv call WS_Rename("<args>")
+command! -nargs=1 WSbm call WS_B_Move("<args>")
 
 function! s:init()
     for t in range(1, tabpagenr("$"))
