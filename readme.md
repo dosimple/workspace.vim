@@ -52,6 +52,11 @@ let g:airline#extensions#tabline#show_tab_count = 2
 
 ![screenshot_2020-11-02-020654](https://user-images.githubusercontent.com/355729/97809516-a6037b80-1cb0-11eb-8def-b6aacd4b11e3.png)
 
+## changes compare to original
+
+-Open existing buffer switch to that tab/buffer.
+-Move tab between working spaces.
+-C-^ move to that tab/buffer
 
 # workspace.vim
 
