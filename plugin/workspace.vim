@@ -38,7 +38,7 @@ function! WS_Open(WS)
 endfunc
 
 function! WS_Close(WS)
-    let tabnum = WS_Tabnum(a:WS)
+    let tabnum = a:WS ? WS_Tabnum(a:WS) : tabpagenr()
     if tabnum
         exe "tabclose " . tabnum
     endif
@@ -233,8 +233,9 @@ augroup workspace
 augroup end
 
 command! -nargs=1 WS call WS_Open("<args>")
-command! -nargs=1 WSc call WS_Close("<args>")
+command! -nargs=? WSc call WS_Close("<args>")
 command! -nargs=1 WSmv call WS_Rename("<args>")
+command! -nargs=1 WSbmv call WS_B_Move("<args>")
 
 function! s:init()
     for t in range(1, tabpagenr("$"))

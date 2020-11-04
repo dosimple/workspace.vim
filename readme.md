@@ -17,12 +17,13 @@ Similar to i3wm workspaces holding different windows.
 * `:WS n` will switch to workspace `n` (it is a number).
 * `:WSc [n]` will close current workspace or `n`.
 * `:WSmv n` will rename current workspace to `n` (again a number).
+* `:WSbmv n` will move current buffer to workspace `n`.
 * `:ls`, `:bn`, `:bp` will only operate on those buffers, which belong to the current workspace.
 * Use your favorite buffer switcher.
 
 ## Useful addition to .vimrc
 
-This example uses `Alt` key for the mappings, so it may not work in terminal.
+This example uses `Alt` key for the mappings, so it may not work in some terminals.
 
 ```vim
 map <silent> <M-1> :WS 1<CR>
@@ -46,6 +47,11 @@ imap <M-8> <Esc><M-8>
 imap <M-9> <Esc><M-9>
 imap <M-0> <Esc><M-0>
 
+" Alternate between current and previous workspaces
 map <silent> <M-`> :call WS_Backforth()<CR>
 imap <M-`> <Esc><M-`>
+
+" Show info about workspaces
+map <silent> <F1> :echo WS_Line()<CR>
+imap <F1> <Esc><F1>
 ```
