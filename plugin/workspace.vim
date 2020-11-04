@@ -18,12 +18,13 @@ endif
 
 " Open the workspace
 "
-" Return:   true - for workspace created new
-"           false - workspace exists
+" Return:   1   for workspace created new
+"           0   workspace exists
+"           -1  invalid workspace
 function! WS_Open(WS)
     if a:WS < 1
         call s:warning("Workspace invalid.")
-        return
+        return -1
     endif
     let tabnum = WS_Tabnum(a:WS)
     if tabnum
@@ -31,7 +32,7 @@ function! WS_Open(WS)
     else
         exe WS_Tabnum(a:WS, 1) . "tabnew"
         call WS_Rename(a:WS)
-        call s:bufdummy()
+        call s:bufdummy(0)
     endif
     echo WS_Line()
     return ! tabnum
@@ -89,16 +90,17 @@ function! WS_Rename(WS)
         return
     endif
     exe "tabmove " . WS_Tabnum(a:WS, 1)
-    for b in WS_Buffers(t:WS)
+    for b in WS_Buffers(t:WS, v:true)
         call setbufvar(b.bufnr, "WS", a:WS)
     endfor
     let t:WS = a:WS
 endfunc
 
-function! WS_Buffers(WS)
+function! WS_Buffers(WS, ...)
+    let all = get(a:, 1, v:false)
     let bs = []
     for b in getbufinfo()
-        if get(b.variables, "WS") == a:WS
+        if get(b.variables, "WS") == a:WS && (all || b.listed || get(b.variables, "WS_listed"))
             call add(bs, b)
         endif
     endfor
@@ -107,13 +109,7 @@ endfunc
 
 function! WS_B_Move(to)
     let bnr = bufnr("%")
-    let alt = bufnr("#")
-    if alt == -1
-        enew
-        call s:bufdummy()
-    else
-        exe "buffer " . alt
-    endif
+    call s:buffer_alt_or_dummy()
     call WS_Open(a:to)
     exe "buffer " . bnr
 endfunc
@@ -200,9 +196,7 @@ endfunc
 function! s:tableave()
     let s:prev = t:WS
     for b in WS_Buffers(t:WS)
-        if b.listed
-            call s:buflisted(b.bufnr, 0)
-        endif
+        call s:buflisted(b.bufnr, 0)
     endfor
 endfunc
 
@@ -211,9 +205,7 @@ function! s:tabenter()
         call s:tabinit()
     endif
     for b in WS_Buffers(t:WS)
-        if get(b.variables, "WS_listed")
-            call s:buflisted(b.bufnr, 1)
-        endif
+        call s:buflisted(b.bufnr, 1)
     endfor
 endfunc
 
@@ -222,9 +214,31 @@ function! s:bufadd(bnr)
     call setbufvar(a:bnr, "WS", t:WS)
 endfunc
 
+function! s:buffer_alt_or_dummy()
+    let alt = bufnr("#")
+    if alt > -1 && alt != bufnr("%")
+        buffer #
+    else
+        call s:bufdummy(1)
+    endif
+endfunc
+
 function! s:bufenter()
-    let b:WS = t:WS
     let bnr = bufnr("%")
+    let bWS = get(b:, "WS")
+    if bWS && bWS != t:WS
+        " Disassociate the buffer from the windows of previous workspace
+        let tabprev = WS_Tabnum(bWS)
+        let winid = win_getid()
+        for wid in win_findbuf(bnr)
+            if tabprev == win_id2tabwin(wid)[0]
+                call win_gotoid(wid)
+                call s:buffer_alt_or_dummy()
+            endif
+        endfor
+        call win_gotoid(winid)
+    endif
+    let b:WS = t:WS
     if getbufvar(bnr, "WS_listed")
         call s:buflisted(bnr, 1)
     endif
@@ -232,7 +246,10 @@ function! s:bufenter()
     call s:collect_orphans()
 endfunc
 
-function! s:bufdummy()
+function! s:bufdummy(create)
+    if a:create
+        enew
+    endif
     setl nomodifiable
     setl nobuflisted
     setl noswapfile
