@@ -50,15 +50,32 @@ function! WS_Backforth()
     endif
 endfunc
 
+function! WS_Empty(WS)
+    let t = WS_Tabnum(a:WS)
+    if tabpagewinnr(t, "$") != 1
+        return v:false
+    endif
+    let bs = tabpagebuflist(t)
+    if len(bs) > 1 || ! s:isbufdummy(bs[0])
+        return v:false
+    endif
+    let bs = WS_Buffers(t:WS)
+    if len(bs) > 1
+        return v:false
+    endif
+    return len(bs) == 0 || s:isbufdummy(bs[0])
+endfunc
+
 function! WS_Line()
     let st = []
     for t in range(1, tabpagenr("$"))
         let tWS = gettabvar(t, "WS")
         if t == tabpagenr()
-            call add(st, "<".tWS.">")
-        else
-            call add(st, tWS)
+            let tWS = "<" . tWS . ">"
+        elseif WS_Empty(tWS)
+            continue
         endif
+        call add(st, tWS)
     endfor
     return " " . join(st, " | ")
 endfunc
@@ -124,9 +141,9 @@ function! s:warning(msg)
     echohl WarningMsg | echo a:msg | echohl None
 endfunc
 
-" Initialize the tabpage populating
+" Initialize current tabpage, by populating
 " the t:WS variable to an available workspace number.
-" Expect other tabs to habe beeen initialized.
+" Expect other tabs to have beeen initialized.
 function! s:tabinit()
     let tabnum = tabpagenr()
     let WSp = gettabvar(tabnum - 1, "WS", 0)
@@ -221,6 +238,15 @@ function! s:bufdummy()
     setl noswapfile
     setl bufhidden=wipe
     "setl buftype=nofile
+endfunc
+
+" Check, whether the buffer is dummy or empty scratch
+function! s:isbufdummy(b)
+    let b = a:b
+    if type(b) != v:t_dict
+        let b = getbufinfo(b)[0]
+    endif
+    return ! b.changed && b.name == ""
 endfunc
 
 augroup workspace
