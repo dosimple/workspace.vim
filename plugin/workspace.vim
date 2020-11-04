@@ -60,7 +60,7 @@ function! WS_Empty(WS)
     if len(bs) > 1 || ! s:isbufdummy(bs[0])
         return v:false
     endif
-    let bs = WS_Buffers(t:WS)
+    let bs = WS_Buffers(a:WS)
     if len(bs) > 1
         return v:false
     endif
