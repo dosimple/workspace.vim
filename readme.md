@@ -58,6 +58,7 @@ let g:airline#extensions#tabline#show_tab_count = 2
 * Can move tab between working spaces.
 * C-^ switch tab then buffer.
 * Closing tab now move old buffer to previous left tab, if not then first tab.
+* Do not show empty workspaces (copied from original res)
 
 # workspace.vim
 
