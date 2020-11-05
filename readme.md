@@ -15,9 +15,9 @@ nnoremap <silent> <leader>3 :WS 3<CR>
 ```
 ```vim
 " move current buffer to tab N
-nnoremap <silent> <leader><leader>1 :WSbm 1<CR>
-nnoremap <silent> <leader><leader>2 :WSbm 2<CR>
-nnoremap <silent> <leader><leader>3 :WSbm 3<CR>
+nnoremap <silent> <leader><leader>1 :WSbmv 1<CR>
+nnoremap <silent> <leader><leader>2 :WSbmv 2<CR>
+nnoremap <silent> <leader><leader>3 :WSbmv 3<CR>
   .
   .
   .
