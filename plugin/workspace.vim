@@ -275,7 +275,7 @@ function! s:bufenter()
       endif
     endfor
 
-    if(b:WS == 0)
+    if(getbufvar(bnr, 'WS', 0) == 0)
       let b:WS = t:WS
     endif
     " Workaround for BufAdd
@@ -309,7 +309,7 @@ augroup end
 command! -nargs=1 WS call WS_Open("<args>")
 command! -nargs=1 WSc call WS_Close("<args>")
 command! -nargs=1 WSmv call WS_Rename("<args>")
-command! -nargs=1 WSbm call WS_B_Move("<args>")
+command! -nargs=1 WSbmv call WS_B_Move("<args>")
 
 function! s:init()
     for t in range(1, tabpagenr("$"))
