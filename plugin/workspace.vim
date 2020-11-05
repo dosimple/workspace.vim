@@ -102,8 +102,6 @@ function! WS_B_Move(to)
     let bnr = bufnr("%")
     call WS_Open(a:to)
     exe "buffer " . bnr
-    let b:WS = t:WS
-    call s:buflisted(bnr, 1)
 endfunc
 
 function! WS_Tabnum(WS, ...)
@@ -157,8 +155,10 @@ endfunc
 
 function! s:buflisted(bufnum, listed)
     if a:listed
+        call setbufvar(a:bufnum, "WS_listed", "")
         call setbufvar(a:bufnum, "&buflisted", 1)
     else
+        call setbufvar(a:bufnum, "WS_listed", 1)
         call setbufvar(a:bufnum, "&buflisted", 0)
     endif
 endfunc
@@ -190,7 +190,7 @@ function! s:tabclosed()
               let firstTab = gettabinfo()[0]
               let bWS = get(firstTab.variables, "WS")
             endif
-            if bWS == t:WS
+            if bWS == t:WS && get(b.variables, "WS_listed")
                 call s:buflisted(b.bufnr, 1)
             endif
             " move buffer to prev tab, or first tab.
@@ -211,7 +211,9 @@ function! s:tableave()
     call s:cleanemptybuffers()
     let s:prev = t:WS
     for b in WS_Buffers(t:WS)
-      call s:buflisted(b.bufnr, 0)
+        if b.listed
+            call s:buflisted(b.bufnr, 0)
+        endif
     endfor
 endfunc
 
@@ -224,13 +226,15 @@ function! s:tabenter()
     let bnr = bufnr("%")
     let wsbuffers = WS_Buffers(t:WS)
     for b in wsbuffers 
-      if(empty(target))
-         let target = b 
-      endif
-      call s:buflisted(b.bufnr, 1)
-      if(bnr == b.bufnr)
-        let switchbuf = 0
-      endif
+        if get(b.variables, "WS_listed")
+            if(empty(target))
+               let target = b 
+            endif
+            call s:buflisted(b.bufnr, 1)
+            if(bnr == b.bufnr)
+              let switchbuf = 0
+            endif
+        endif
     endfor
     if(empty(target)) 
         let switchbuf = 0
@@ -241,7 +245,6 @@ function! s:tabenter()
     " 1      0      no
     " 0      ?      exe
     if(switchbuf && !empty(target) && !(getbufinfo(target.bufnr)[0].loaded == 1 && getbufinfo(target.bufnr)[0].hidden == 0))
-        echo 'swiiitch'
         exe "buffer " . target.bufnr 
     endif
 endfunc
@@ -269,14 +272,14 @@ function! s:bufenter()
               endfor
             if(!foundWindow)
               exe "buffer " . b.bufnr 
-              call s:buflisted(bnr, 1)
             endif
         endif
       endif
     endfor
 
-    if(getbufvar(bnr, 'WS', 0) == 0)
-      let b:WS = t:WS
+    let b:WS = t:WS
+    if getbufvar(bnr, "WS_listed")
+        call s:buflisted(bnr, 1)
     endif
     " Workaround for BufAdd
     call s:collect_orphans()
