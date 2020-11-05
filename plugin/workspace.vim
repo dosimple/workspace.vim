@@ -50,15 +50,24 @@ function! WS_Backforth()
     endif
 endfunc
 
+function! s:isbufdummy(b)
+    let b = a:b
+    if type(b) != v:t_dict
+        let b = getbufinfo(b)[0]
+    endif
+    return ! b.changed && b.name == ""
+endfunc
+
 function! WS_Line()
     let st = []
     for t in range(1, tabpagenr("$"))
         let tWS = gettabvar(t, "WS")
         if t == tabpagenr()
-            call add(st, "<".tWS.">")
-        else
-            call add(st, tWS)
+          let tWS = "<" . tWS . ">"
+        elseif WS_Empty(tWS)
+          continue
         endif
+        call add(st, tWS)
     endfor
     return " " . join(st, " | ")
 endfunc
@@ -151,6 +160,22 @@ function! s:buflisted(bufnum, listed)
         call setbufvar(a:bufnum, "WS_listed", 1)
         call setbufvar(a:bufnum, "&buflisted", 0)
     endif
+endfunc
+
+function! WS_Empty(WS)
+    let t = WS_Tabnum(a:WS)
+    if tabpagewinnr(t, "$") != 1
+        return v:false
+    endif
+    let bs = tabpagebuflist(t)
+    if len(bs) > 1 || ! s:isbufdummy(bs[0])
+        return v:false
+    endif
+    let bs = WS_Buffers(a:WS)
+    if len(bs) > 1
+        return v:false
+    endif
+    return len(bs) == 0 || s:isbufdummy(bs[0])
 endfunc
 
 function! s:tabclosed()
@@ -277,4 +302,5 @@ function! s:init()
 endfunc
 
 call s:init()
+
 
