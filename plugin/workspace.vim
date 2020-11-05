@@ -102,6 +102,8 @@ function! WS_B_Move(to)
     let bnr = bufnr("%")
     call WS_Open(a:to)
     exe "buffer " . bnr
+    let b:WS = t:WS
+    call s:buflisted(bnr, 1)
 endfunc
 
 function! WS_Tabnum(WS, ...)
@@ -155,10 +157,8 @@ endfunc
 
 function! s:buflisted(bufnum, listed)
     if a:listed
-        call setbufvar(a:bufnum, "WS_listed", "")
         call setbufvar(a:bufnum, "&buflisted", 1)
     else
-        call setbufvar(a:bufnum, "WS_listed", 1)
         call setbufvar(a:bufnum, "&buflisted", 0)
     endif
 endfunc
@@ -190,7 +190,7 @@ function! s:tabclosed()
               let firstTab = gettabinfo()[0]
               let bWS = get(firstTab.variables, "WS")
             endif
-            if bWS == t:WS && get(b.variables, "WS_listed")
+            if bWS == t:WS
                 call s:buflisted(b.bufnr, 1)
             endif
             " move buffer to prev tab, or first tab.
@@ -208,11 +208,10 @@ function! s:collect_orphans()
 endfunc
 
 function! s:tableave()
+    call s:cleanemptybuffers()
     let s:prev = t:WS
     for b in WS_Buffers(t:WS)
-        if b.listed
-            call s:buflisted(b.bufnr, 0)
-        endif
+      call s:buflisted(b.bufnr, 0)
     endfor
 endfunc
 
@@ -225,15 +224,13 @@ function! s:tabenter()
     let bnr = bufnr("%")
     let wsbuffers = WS_Buffers(t:WS)
     for b in wsbuffers 
-        if get(b.variables, "WS_listed")
-            if(empty(target))
-               let target = b 
-            endif
-            call s:buflisted(b.bufnr, 1)
-            if(bnr == b.bufnr)
-              let switchbuf = 0
-            endif
-        endif
+      if(empty(target))
+         let target = b 
+      endif
+      call s:buflisted(b.bufnr, 1)
+      if(bnr == b.bufnr)
+        let switchbuf = 0
+      endif
     endfor
     if(empty(target)) 
         let switchbuf = 0
@@ -272,14 +269,14 @@ function! s:bufenter()
               endfor
             if(!foundWindow)
               exe "buffer " . b.bufnr 
+              call s:buflisted(bnr, 1)
             endif
         endif
       endif
     endfor
 
-    let b:WS = t:WS
-    if getbufvar(bnr, "WS_listed")
-        call s:buflisted(bnr, 1)
+    if(b:WS == 0)
+      let b:WS = t:WS
     endif
     " Workaround for BufAdd
     call s:collect_orphans()
@@ -292,6 +289,13 @@ function! s:bufdummy()
     setl bufhidden=wipe
     "setl buftype=nofile
 endfunc
+
+function! s:cleanemptybuffers()
+    let buffers = filter(range(1, bufnr('$')), 'buflisted(v:val) && empty(bufname(v:val)) && bufwinnr(v:val)<0 && !getbufvar(v:val, "&mod")')
+    if !empty(buffers)
+        exe 'bw ' . join(buffers, ' ')
+    endif
+endfunction
 
 augroup workspace
     autocmd!
