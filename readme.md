@@ -41,7 +41,7 @@ let g:airline#extensions#tabline#show_tab_count = 2
 
 ## Additional Usage. Refer Below for more
 
-* `:WSmb n` will move current buffer to workspace `n` (it is a number).
+* `:WSmbv n` will move current buffer to workspace `n` (it is a number).
 
 ## Images (Workspace <1> | 2)
 
