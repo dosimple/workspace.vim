@@ -32,6 +32,8 @@ function! WS_Open(WS)
         exe WS_Tabnum(a:WS, 1) . "tabnew"
         call WS_Rename(a:WS)
         enew
+        setl nobuflisted
+        setl bufhidden=wipe
         " call s:bufdummy()
     endif
     echo WS_Line()
@@ -239,6 +241,8 @@ function! s:tabenter()
     if(empty(target)) 
         let switchbuf = 0
         enew
+        setl nobuflisted
+        setl bufhidden=wipe
     endif
     " loaded hidden
     " 1      1      exe
@@ -256,33 +260,29 @@ endfunc
 
 function! s:bufenter()
     let bnr = bufnr("%")
-    
 
-    if getbufvar(bnr, "WS_listed")
-      call s:buflisted(bnr, 1)
-    endif
-
-    for b in getbufinfo(bnr)
-      if b.listed 
-        let bWS = get(b.variables, "WS")
+    let bWS = get(b:, "WS")
+    if bWS && bWS != t:WS
         let tabnum = WS_Tabnum(bWS)
         if tabnum
             let foundWindow = 0
             exe "tabnext " . tabnum
-              for wid in win_findbuf(b.bufnr)
+              for wid in win_findbuf(bnr)
                   if tabnum == win_id2tabwin(wid)[0]
                       let foundWindow= 1
                       call win_gotoid(wid)
                   endif
               endfor
             if(!foundWindow)
-              exe "buffer " . b.bufnr 
+              exe "buffer " . bnr 
             endif
         endif
-      endif
-    endfor
+    endif
 
     let b:WS = t:WS
+    if getbufvar(bnr, "WS_listed")
+      call s:buflisted(bnr, 1)
+    endif
     " Workaround for BufAdd
     call s:collect_orphans()
 endfunc
