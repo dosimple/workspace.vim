@@ -16,6 +16,7 @@ if v:version < 700
     finish
 endif
 
+let s:trydeleteprev = 0
 " Open the workspace
 "
 " Return:   true - for workspace created new
@@ -25,6 +26,7 @@ function! WS_Open(WS)
         call s:warning("Workspace invalid.")
         return
     endif
+    let s:trydeleteprev = 1
     let tabnum = WS_Tabnum(a:WS)
     if tabnum
         exe "tabnext " . tabnum
@@ -101,6 +103,9 @@ endfunc
 
 function! WS_B_Move(to)
     let bnr = bufnr("%")
+    exe 'bn'
+    " call s:buflisted(bnr, 0)
+    let s:trydeleteprev = 1
     call setbufvar(bnr, 'WS', a:to)
     call WS_Open(a:to)
     exe "buffer " . bnr
@@ -165,6 +170,7 @@ function! s:buflisted(bufnum, listed)
     endif
 endfunc
 
+
 function! WS_Empty(WS)
     let t = WS_Tabnum(a:WS)
     if tabpagewinnr(t, "$") != 1
@@ -210,7 +216,7 @@ function! s:collect_orphans()
 endfunc
 
 function! s:tableave()
-    call s:cleanemptybuffers()
+    " call s:cleanallemptybuffers()
     let s:prev = t:WS
     for b in WS_Buffers(t:WS)
         if b.listed
@@ -223,11 +229,11 @@ function! s:tabenter()
     if ! get(t:, "WS")
         call s:tabinit()
     endif
+    
     let switchbuf = 1
     let target = {} 
     let bnr = bufnr("%")
-    let wsbuffers = WS_Buffers(t:WS)
-    for b in wsbuffers 
+    for b in WS_Buffers(t:WS)
         if get(b.variables, "WS_listed")
             if(empty(target))
                let target = b 
@@ -250,6 +256,22 @@ function! s:tabenter()
     " 0      ?      exe
     if(switchbuf && !empty(target) && !(getbufinfo(target.bufnr)[0].loaded == 1 && getbufinfo(target.bufnr)[0].hidden == 0))
         exe "buffer " . target.bufnr 
+    endif
+
+    if(s:trydeleteprev)
+      let s:trydeleteprev = 0
+      for b in WS_Buffers(s:prev)
+         if(s:isbufdummy(b.bufnr))
+           exe 'bw ' . b.bufnr 
+         endif
+      endfor
+      let bs = WS_Buffers(s:prev)
+      if len(bs) == 0 
+        let tabnum = WS_Tabnum(s:prev)
+        if tabnum
+            exe "tabclose " . tabnum
+        endif
+      endif
     endif
 endfunc
 
@@ -296,7 +318,7 @@ function! s:bufdummy()
     "setl buftype=nofile
 endfunc
 
-function! s:cleanemptybuffers()
+function! s:cleanallemptybuffers()
     let buffers = filter(range(1, bufnr('$')), 'buflisted(v:val) && empty(bufname(v:val)) && bufwinnr(v:val)<0 && !getbufvar(v:val, "&mod")')
     if !empty(buffers)
         exe 'bw ' . join(buffers, ' ')
