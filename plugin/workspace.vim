@@ -64,11 +64,10 @@ function! WS_Line()
     for t in range(1, tabpagenr("$"))
         let tWS = gettabvar(t, "WS")
         if t == tabpagenr()
-          let tWS = "<" . tWS . ">"
-        elseif WS_Empty(tWS)
-          continue
+          call add(st, "<" . tWS . ">")
+        else
+          call add(st, tWS)
         endif
-        call add(st, tWS)
     endfor
     return " " . join(st, " | ")
 endfunc
@@ -100,6 +99,7 @@ endfunc
 
 function! WS_B_Move(to)
     let bnr = bufnr("%")
+    call setbufvar(bnr, 'WS', a:to)
     call WS_Open(a:to)
     exe "buffer " . bnr
 endfunc
@@ -257,10 +257,15 @@ endfunc
 function! s:bufenter()
     let bnr = bufnr("%")
     
+
+    if getbufvar(bnr, "WS_listed")
+      call s:buflisted(bnr, 1)
+    endif
+
     for b in getbufinfo(bnr)
       if b.listed 
-        let b:WS = get(b.variables, "WS")
-        let tabnum = WS_Tabnum(b:WS)
+        let bWS = get(b.variables, "WS")
+        let tabnum = WS_Tabnum(bWS)
         if tabnum
             let foundWindow = 0
             exe "tabnext " . tabnum
@@ -278,9 +283,6 @@ function! s:bufenter()
     endfor
 
     let b:WS = t:WS
-    if getbufvar(bnr, "WS_listed")
-        call s:buflisted(bnr, 1)
-    endif
     " Workaround for BufAdd
     call s:collect_orphans()
 endfunc
