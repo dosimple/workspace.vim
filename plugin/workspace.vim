@@ -261,6 +261,10 @@ endfunc
 function! s:bufenter()
     let bnr = bufnr("%")
 
+    if getbufvar(bnr, "WS_listed")
+      call s:buflisted(bnr, 1)
+    endif
+
     let bWS = get(b:, "WS")
     if bWS && bWS != t:WS
         let tabnum = WS_Tabnum(bWS)
@@ -280,9 +284,6 @@ function! s:bufenter()
     endif
 
     let b:WS = t:WS
-    if getbufvar(bnr, "WS_listed")
-      call s:buflisted(bnr, 1)
-    endif
     " Workaround for BufAdd
     call s:collect_orphans()
 endfunc
