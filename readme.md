@@ -1,8 +1,8 @@
 ## Forked # workspace.vim
 
-Forked following (workspace.vim) project to allow to use tab as workspaces to manage buffers similar to i3/sway.
+Forked following (workspace.vim) project. It allow to use tabs as workspaces to manage buffers similar to i3/sway.
 
-## changes compare to original
+## Changes compare to original
 * Can move buffers between tabs
 * :e, C-^, C-0, gd, gf will try to seek buffer last tab and window 
 * Closing tab now move old buffer to previous left pos tab, 
@@ -61,7 +61,7 @@ let g:airline#extensions#tabline#show_tab_count = 2
 
 ![screenshot_2020-11-02-020654](https://user-images.githubusercontent.com/355729/97809516-a6037b80-1cb0-11eb-8def-b6aacd4b11e3.png)
 
-# workspace.vim
+# workspace.vim (original Readme)
 
 The main purpose of this plugin is to make it easier
 to manage large number of buffers by letting the user
