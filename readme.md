@@ -33,8 +33,12 @@ nnoremap <silent> <leader><leader>3 :WSbmv 3<CR>
 ```
 
 ```vim
-" c-^ alternative, i never use this shortcut though ...
-nnoremap <silent> <leader>` :call WS_Backforth()<CR>
+" if you are using sessoin (ex. startify) close all tabs before exist, otherwise opened buffers are not restored.
+autocmd VimLeavePre * nested call CloseAllTabs()
+
+fun! CloseAllTabs()
+  exe 'tabo'
+endfun
 ```
 
 To move between buffers use :bn :bp or any buffer plugin. If deleting buffers ever randomly close parent tabs, please use moll/vim-bbye or similar plugins to delete buffers. Just like i3/sway I do not think you should use WSc (close current workspace/tab) bcz empty workspaces will close automatically now.
