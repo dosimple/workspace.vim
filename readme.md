@@ -1,8 +1,17 @@
 ## Forked # workspace.vim
 
-Forked following (workspace.vim) project to allow to use tab as workspaces to manage buffers similar to i3/sway. 
+Forked following (workspace.vim) project to allow to use tab as workspaces to manage buffers similar to i3/sway.
 
-my binding are:
+## changes compare to original
+* Can move buffers between tabs
+* :e, C-^, C-0, gd, gf will try to seek buffer last tab and window 
+* Closing tab now move old buffer to previous left pos tab, 
+* Empty workspace (tabs) are actually removed
+* :bd should work fine
+* Also check original fork bcz he is progressing too =D
+
+## My bindings and .vimrc
+
 ```vim
 " create a new tab with N title or move to an exiting N tab.
 nnoremap <silent> <leader>1 :WS 1<CR>
@@ -28,7 +37,6 @@ nnoremap <silent> <leader><leader>3 :WSbmv 3<CR>
 nnoremap <silent> <leader>` :call WS_Backforth()<CR>
 ```
 
-
 To move between buffers use :bn :bp or any buffer plugin. If deleting buffers ever randomly close parent tabs, please use moll/vim-bbye or similar plugins to delete buffers. Just like i3/sway I do not think you should use WSc (close current workspace/tab) bcz empty workspaces will close automatically now.
 
 if you are using airline following setting produce best result:
@@ -52,13 +60,6 @@ let g:airline#extensions#tabline#show_tab_count = 2
 
 
 ![screenshot_2020-11-02-020654](https://user-images.githubusercontent.com/355729/97809516-a6037b80-1cb0-11eb-8def-b6aacd4b11e3.png)
-
-## changes compare to original
-* Can move buffers between tabs
-* :e, C-^, C-0, gd, gf will try to seek buffer last tab and window 
-* Closing tab now move old buffer to previous left pos tab, 
-* Empty workspace (tabs) are actually removed
-* :bd should work fine
 
 # workspace.vim
 
