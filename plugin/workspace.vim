@@ -103,8 +103,9 @@ endfunc
 
 function! WS_B_Move(to)
     let bnr = bufnr("%")
+    " this fixes: WSbmv N, then immediatly :bd will unexpectedly close tab N 
     exe 'bn'
-    " call s:buflisted(bnr, 0)
+
     let s:trydeleteprev = 1
     call setbufvar(bnr, 'WS', a:to)
     call WS_Open(a:to)
@@ -160,6 +161,7 @@ function! s:tabinit()
     return WS
 endfunc
 
+" unlisted buffers are tracked with WS_listed variable 
 function! s:buflisted(bufnum, listed)
     if a:listed
         call setbufvar(a:bufnum, "WS_listed", "")
@@ -168,23 +170,6 @@ function! s:buflisted(bufnum, listed)
         call setbufvar(a:bufnum, "WS_listed", 1)
         call setbufvar(a:bufnum, "&buflisted", 0)
     endif
-endfunc
-
-
-function! WS_Empty(WS)
-    let t = WS_Tabnum(a:WS)
-    if tabpagewinnr(t, "$") != 1
-        return v:false
-    endif
-    let bs = tabpagebuflist(t)
-    if len(bs) > 1 || ! s:isbufdummy(bs[0])
-        return v:false
-    endif
-    let bs = WS_Buffers(a:WS)
-    if len(bs) > 1
-        return v:false
-    endif
-    return len(bs) == 0 || s:isbufdummy(bs[0])
 endfunc
 
 function! s:tabclosed()
@@ -198,10 +183,11 @@ function! s:tabclosed()
               let firstTab = gettabinfo()[0]
               let bWS = get(firstTab.variables, "WS")
             endif
+            " if next tab is actuall opene, move buffer to it
             if bWS == t:WS && get(b.variables, "WS_listed")
                 call s:buflisted(b.bufnr, 1)
             endif
-            " move buffer to prev tab, or first tab.
+            " move buffers to prev tab, or first tab.
             call setbufvar(b.bufnr, "WS", bWS)
         endif
     endfor
@@ -258,6 +244,7 @@ function! s:tabenter()
         exe "buffer " . target.bufnr 
     endif
 
+    " will try to remove previous empty workspace 
     if(s:trydeleteprev)
       let s:trydeleteprev = 0
       for b in WS_Buffers(s:prev)
@@ -287,6 +274,8 @@ function! s:bufenter()
       call s:buflisted(bnr, 1)
     endif
 
+    " for an already opened buffer, on c-o, :e, mark etc.
+    " focuses an existing tab or window.
     let bWS = get(b:, "WS")
     if bWS && bWS != t:WS
         let tabnum = WS_Tabnum(bWS)
@@ -309,21 +298,6 @@ function! s:bufenter()
     " Workaround for BufAdd
     call s:collect_orphans()
 endfunc
-
-function! s:bufdummy()
-    setl nomodifiable
-    setl nobuflisted
-    setl noswapfile
-    setl bufhidden=wipe
-    "setl buftype=nofile
-endfunc
-
-function! s:cleanallemptybuffers()
-    let buffers = filter(range(1, bufnr('$')), 'buflisted(v:val) && empty(bufname(v:val)) && bufwinnr(v:val)<0 && !getbufvar(v:val, "&mod")')
-    if !empty(buffers)
-        exe 'bw ' . join(buffers, ' ')
-    endif
-endfunction
 
 augroup workspace
     autocmd!
