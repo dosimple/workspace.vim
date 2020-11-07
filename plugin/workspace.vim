@@ -87,7 +87,7 @@ function! WS_Letter()
           call add(st, tWS)
         endif
     endfor
-    return join(st, " | ")
+    return join(st, "  ")
 endfunc
 
 function! WS_Line()
