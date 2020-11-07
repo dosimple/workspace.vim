@@ -38,7 +38,13 @@ function! WS_Open(WS)
         setl bufhidden=wipe
         " call s:bufdummy()
     endif
-    echo WS_Line()
+
+    if !exists("g:workspace#vim#airline#enable")
+      let g:workspace#vim#airline#enable = 0
+    endif
+    if(!g:workspace#vim#airline#enable)
+      echo WS_Line()
+    endif
     return ! tabnum
 endfunc
 
@@ -61,6 +67,27 @@ function! s:isbufdummy(b)
         let b = getbufinfo(b)[0]
     endif
     return ! b.changed && b.name == ""
+endfunc
+
+function! WS_Letter()
+    if !exists("g:workspace#vim#airline#enable")
+      let g:workspace#vim#airline#enable = 0
+    endif
+    if(!g:workspace#vim#airline#enable)
+      return ''
+    endif
+    let st = []
+    " let char = "\u0336"
+    let char = "\u0332"
+    for t in range(1, tabpagenr("$"))
+        let tWS = gettabvar(t, "WS")
+        if t == tabpagenr()
+          call add(st, tWS . char)
+        else
+          call add(st, tWS)
+        endif
+    endfor
+    return join(st, " | ")
 endfunc
 
 function! WS_Line()
@@ -297,6 +324,12 @@ function! s:bufenter()
     let b:WS = t:WS
     " Workaround for BufAdd
     call s:collect_orphans()
+
+    let g:airline#extensions#tabline#buffers_label = WS_Letter() 
+endfunc
+
+function! s:bufwinenter()
+    let g:airline#extensions#tabline#buffers_label = WS_Letter() 
 endfunc
 
 augroup workspace
@@ -306,6 +339,7 @@ augroup workspace
     autocmd TabClosed   * nested call s:tabclosed()
     "autocmd BufAdd     * nested call s:bufadd(expand("<abuf>"))
     autocmd BufEnter    * nested call s:bufenter()
+    autocmd WinEnter    * nested call s:bufwinenter()
 augroup end
 
 command! -nargs=1 WS call WS_Open("<args>")
