@@ -66,6 +66,9 @@ let g:airline#extensions#tabline#show_tab_count = 2
 
 ![screenshot_2020-11-02-020654](https://user-images.githubusercontent.com/355729/97809516-a6037b80-1cb0-11eb-8def-b6aacd4b11e3.png)
 
+
+![screenshot_2020-11-07-160424](https://user-images.githubusercontent.com/355729/98434454-19731600-2113-11eb-91ca-ad5ea60e1445.png)
+
 # workspace.vim (original Readme)
 
 The main purpose of this plugin is to make it easier
