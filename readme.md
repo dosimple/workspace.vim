@@ -4,7 +4,7 @@ Forked following (workspace.vim) project. It allow to use tabs as workspaces to 
 
 ## Changes compare to original
 * Can move buffers between tabs
-* :e, C-^, C-0, gd, gf will try to seek buffer last tab and window 
+* :e, C-^, C-0, gd, gf, marks will try to seek buffer last tab and window 
 * Closing tab now move old buffer to previous left pos tab, 
 * Empty workspace (tabs) are actually removed
 * :bd should work fine
