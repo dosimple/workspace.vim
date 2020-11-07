@@ -44,12 +44,13 @@ endfun
 
 To move between buffers use :bn :bp or any buffer plugin. If deleting buffers ever randomly close parent tabs, please use moll/vim-bbye or similar plugins to delete buffers. Just like i3/sway I do not think you should use WSc (close current workspace/tab) bcz empty workspaces will close automatically now.
 
-if you are using airline following setting produce best result:
+## Airline integration
 
-```vim
+``` non-offecial airline intergration, see screenshot below
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#show_tabs = 0
-let g:airline#extensions#tabline#show_tab_count = 2
+let g:airline#extensions#tabline#show_tab_count = 0
+let g:workspace#vim#airline#enable = 1
 ```
 
 ## Additional Usage. Refer Below for more
