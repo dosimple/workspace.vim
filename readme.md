@@ -33,7 +33,8 @@ nnoremap <silent> <leader><leader>3 :WSbmv 3<CR>
 ```
 
 ```vim
-" if you are using sessoin (ex. startify) close all tabs before exist, otherwise opened buffers are not restored.
+" if you are using sessoin (ex. startify) close all tabs before exist,
+" otherwise opened buffers are not restored.
 autocmd VimLeavePre * nested call CloseAllTabs()
 
 fun! CloseAllTabs()
