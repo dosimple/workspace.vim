@@ -2,6 +2,10 @@
 
 Forked following (workspace.vim) project. It allow to use tabs as workspaces to manage buffers similar to i3/sway.
 
+## For updating
+
+Please clean and reinstall from repository (last change: 2020-11-07 : airline-intergration)
+
 ## Changes compare to original
 * Can move buffers between tabs
 * :e, C-^, C-0, gd, gf, marks will try to seek buffer last tab and window 
