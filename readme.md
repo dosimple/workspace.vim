@@ -63,6 +63,9 @@ let g:workspace#vim#airline#enable = 1
 
 ## Images (Workspace <1> | 2)
 
+![screenshot_2020-11-09-142417](https://user-images.githubusercontent.com/355729/98503223-536d2500-2297-11eb-931b-5dcfd694cbaf.png)
+
+
 ![screenshot_2020-11-07-162650](https://user-images.githubusercontent.com/355729/98434787-1decfe00-2116-11eb-9315-7efe9b497999.png)
 
 
