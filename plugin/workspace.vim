@@ -79,15 +79,16 @@ function! WS_Letter()
     let st = []
     " let char = "\u0336"
     let char = "\u0332"
+    " let char = ''
     for t in range(1, tabpagenr("$"))
         let tWS = gettabvar(t, "WS")
         if t == tabpagenr()
-          call add(st, tWS . char)
+          call add(st, '%1*' . tWS . char . '%')
         else
-          call add(st, tWS)
+          call add(st, '%2*' . tWS  . '%')
         endif
     endfor
-    return join(st, "  ")
+    return join(st, "\ \ ") . ' '
 endfunc
 
 function! WS_Line()
@@ -229,7 +230,6 @@ function! s:collect_orphans()
 endfunc
 
 function! s:tableave()
-    " call s:cleanallemptybuffers()
     let s:prev = t:WS
     for b in WS_Buffers(t:WS)
         if b.listed
@@ -325,8 +325,37 @@ function! s:bufenter()
     " Workaround for BufAdd
     call s:collect_orphans()
 
-    let g:airline#extensions#tabline#buffers_label = WS_Letter() 
+    let g:airline#extensions#tabline#buffers_label = WS_Letter()
 endfunc
+
+function! s:returnhighlightterm(group, term)
+   " Store output of group to variable
+   let output = execute('hi ' . a:group)
+
+   " Find the term we're looking for
+   return matchstr(output, a:term.'=\zs\S*')
+endfunction
+
+function! WorkspaceColor(...)
+  let guibg_color = s:returnhighlightterm('airline_tablabel_right', 'guibg')
+  let guifg_color =  s:returnhighlightterm('airline_tablabel_right', 'guifg')
+  let ctermfg_color = s:returnhighlightterm('airline_tablabel_right', 'ctermfg')
+  let ctermbg_color = s:returnhighlightterm('airline_tablabel_right', 'ctermbg')
+  let hi_command1 = 'hi User1 gui=bold guibg=' . guibg_color
+        \ . ' guifg=' . guifg_color
+        \ . ' ctermfg=' . ctermfg_color
+        \ . ' ctermbg=' . ctermbg_color
+  let hi_command2 = 'hi User2' 
+        \ . ' guibg=' . guibg_color
+        \ . ' guifg=' . guifg_color
+        \ . ' ctermfg=' . ctermfg_color
+        \ . ' ctermbg=' . ctermbg_color
+  exe printf(hi_command1) 
+  exe printf(hi_command2) 
+  hi link airline_tablabel_right User1
+endfunc
+
+call airline#add_statusline_func('WorkspaceColor')
 
 function! s:bufwinenter()
     let g:airline#extensions#tabline#buffers_label = WS_Letter() 
