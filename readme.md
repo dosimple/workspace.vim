@@ -4,7 +4,7 @@ Forked following (workspace.vim) project. It allow to use tabs as workspaces to 
 
 ## For updating
 
-Please clean and reinstall from repository (last change: 2020-11-07 : airline-intergration)
+Please clean and reinstall from repository (last change: 2020-11-09 : airline-intergration)
 
 ## Changes compare to original
 * Can move buffers between tabs
@@ -67,9 +67,6 @@ let g:workspace#vim#airline#enable = 1
 
 
 ![screenshot_2020-11-07-162650](https://user-images.githubusercontent.com/355729/98434787-1decfe00-2116-11eb-9315-7efe9b497999.png)
-
-
-![screenshot_2020-11-02-020612](https://user-images.githubusercontent.com/355729/97809539-b9164b80-1cb0-11eb-9e95-7e5837c81133.png)
 
 
 ![screenshot_2020-11-02-020637](https://user-images.githubusercontent.com/355729/97809527-aef44d00-1cb0-11eb-908a-a692f29eafd3.png)
