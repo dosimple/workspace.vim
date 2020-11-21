@@ -68,6 +68,17 @@ let g:airline#extensions#tabline#show_tabs = 0
 let g:airline#extensions#tabline#show_tab_count = 0
 ```
 
+## Known Issue: Tabs & buffers are not Restored from Session.
+
+If you are using Startfiy (or any session managmenet) you will notice that only last opened tab buffers will be restored next time you read a session. The problem is that this plugin will actually &bufflisted=false buffer from other tabs and nvim will not save them to session file. To solve the problem use :tabo just before leaving nvim to clean all tabs and restore all buffers to &bufferlisted=true. A temporarly solution please use following:
+
+```
+augroup closealltabs
+  autocmd!
+  autocmd VimLeavePre * nested :tabo
+augroup END
+```
+
 ## Additional Usage. Refer Below for more
 
 - `:WSmbv n` will move current buffer to workspace `n` (it is a number).
