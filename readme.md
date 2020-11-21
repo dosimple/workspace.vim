@@ -37,21 +37,12 @@ nnoremap <silent> <leader><leader>3 :WSbmv 3<CR>
   .
 ```
 
-```vim
-" if you are using sessoin (ex. startify) close all tabs before exist,
-" otherwise opened buffers are not restored.
-autocmd VimLeavePre * nested call CloseAllTabs()
-
-fun! CloseAllTabs()
-  exe 'tabo'
-endfun
-```
-
 To move between buffers use :bn :bp or any buffer plugin. If deleting buffers ever randomly close parent tabs, please use moll/vim-bbye or similar plugins to delete buffers. Just like i3/sway I do not think you should use WSc (close current workspace/tab) bcz empty workspaces will close automatically now.
 
 ## Airline integration
 
-```non-offecial airline intergration, see screenshot below
+```vim
+non-offecial airline intergration, see screenshot below
 let g:workspace#vim#airline#enable = 1
 .
 .
@@ -72,7 +63,9 @@ let g:airline#extensions#tabline#show_tab_count = 0
 
 If you are using Startfiy (or any session managmenet) you will notice that only last opened tab's buffers will be restored next time you read a session. The problem is that this plugin will actually &bufflisted=false buffer from other tabs and nvim will not save them to session file. To solve the problem use :tabo just before leaving nvim to clean all tabs and restore all buffers to &bufferlisted=true. A temporarly solution please use following:
 
-```
+```vim
+" if you are using sessoin (ex. startify) close all tabs before exist,
+" otherwise opened buffers are not restored.
 augroup closealltabs
   autocmd!
   autocmd VimLeavePre * nested :tabo
