@@ -42,7 +42,7 @@ To move between buffers use :bn :bp or any buffer plugin. If deleting buffers ev
 ## Airline integration
 
 ```vim
-non-offecial airline intergration, see screenshot below
+" a non-offecial airline intergration, see screenshot below
 let g:workspace#vim#airline#enable = 1
 .
 .
