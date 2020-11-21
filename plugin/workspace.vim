@@ -12,6 +12,10 @@ if exists('loaded_workspace')
 endif
 let loaded_workspace = 1
 
+if !exists("g:workspace#vim#airline#enable")
+    let g:workspace#vim#airline#enable = 0
+endif
+
 if v:version < 700
     finish
 endif
@@ -39,9 +43,6 @@ function! WS_Open(WS)
         " call s:bufdummy()
     endif
 
-    if !exists("g:workspace#vim#airline#enable")
-      let g:workspace#vim#airline#enable = 0
-    endif
     if(!g:workspace#vim#airline#enable)
       echo WS_Line()
     endif
@@ -70,9 +71,6 @@ function! s:isbufdummy(b)
 endfunc
 
 function! WS_Letter()
-    if !exists("g:workspace#vim#airline#enable")
-      let g:workspace#vim#airline#enable = 0
-    endif
     if(!g:workspace#vim#airline#enable)
       return ''
     endif
@@ -239,6 +237,7 @@ function! s:tableave()
 endfunc
 
 function! s:tabenter()
+    let g:SessionLoad = 1
     if ! get(t:, "WS")
         call s:tabinit()
     endif
@@ -295,6 +294,7 @@ function! s:bufadd(bnr)
 endfunc
 
 function! s:bufenter()
+    let g:SessionLoad = 1
     let bnr = bufnr("%")
 
     if getbufvar(bnr, "WS_listed")
@@ -309,12 +309,12 @@ function! s:bufenter()
         if tabnum
             let foundWindow = 0
             exe "tabnext " . tabnum
-              for wid in win_findbuf(bnr)
-                  if tabnum == win_id2tabwin(wid)[0]
-                      let foundWindow= 1
-                      call win_gotoid(wid)
-                  endif
-              endfor
+            for wid in win_findbuf(bnr)
+                if tabnum == win_id2tabwin(wid)[0]
+                    let foundWindow= 1
+                    call win_gotoid(wid)
+                endif
+            endfor
             if(!foundWindow)
               exe "buffer " . bnr 
             endif
@@ -355,8 +355,10 @@ function! WorkspaceColor(...)
   hi link airline_tablabel_right User1
 endfunc
 
-call airline#add_statusline_func('WorkspaceColor')
-
+if g:workspace#vim#airline#enable
+  call airline#add_statusline_func('WorkspaceColor')
+endif
+ 
 function! s:bufwinenter()
     let g:airline#extensions#tabline#buffers_label = WS_Letter() 
 endfunc

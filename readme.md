@@ -7,12 +7,13 @@ Forked following (workspace.vim) project. It allow to use tabs as workspaces to 
 Please clean and reinstall from repository (last change: 2020-11-07 : airline-intergration)
 
 ## Changes compare to original
-* Can move buffers between tabs
-* :e, C-^, C-0, gd, gf, marks will try to seek buffer last tab and window 
-* Closing tab now move old buffer to previous left pos tab, 
-* Empty workspace (tabs) are actually removed
-* :bd should work fine
-* Also check original fork bcz he is progressing too =D
+
+- Can move buffers between tabs
+- :e, C-^, C-0, gd, gf, marks will try to seek buffer last tab and window
+- Closing tab now move old buffer to previous left pos tab,
+- Empty workspace (tabs) are actually removed
+- :bd should work fine
+- Also check original fork bcz he is progressing too =D
 
 ## My bindings and .vimrc
 
@@ -50,31 +51,36 @@ To move between buffers use :bn :bp or any buffer plugin. If deleting buffers ev
 
 ## Airline integration
 
-``` non-offecial airline intergration, see screenshot below
+```non-offecial airline intergration, see screenshot below
+let g:workspace#vim#airline#enable = 1
+.
+.
+.
+call plug#begin('~/.vim/plugged')
+Plug 'ahmadie/workspace.vim'
+Plug 'vim-airline/vim-airline'
+call plug#end()
+.
+.
+.
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#show_tabs = 0
 let g:airline#extensions#tabline#show_tab_count = 0
-let g:workspace#vim#airline#enable = 1
 ```
 
 ## Additional Usage. Refer Below for more
 
-* `:WSmbv n` will move current buffer to workspace `n` (it is a number).
+- `:WSmbv n` will move current buffer to workspace `n` (it is a number).
 
 ## Images (Workspace <1> | 2)
 
 ![screenshot_2020-11-07-162650](https://user-images.githubusercontent.com/355729/98434787-1decfe00-2116-11eb-9315-7efe9b497999.png)
 
-
 ![screenshot_2020-11-02-020612](https://user-images.githubusercontent.com/355729/97809539-b9164b80-1cb0-11eb-9e95-7e5837c81133.png)
-
 
 ![screenshot_2020-11-02-020637](https://user-images.githubusercontent.com/355729/97809527-aef44d00-1cb0-11eb-908a-a692f29eafd3.png)
 
-
 ![screenshot_2020-11-02-020654](https://user-images.githubusercontent.com/355729/97809516-a6037b80-1cb0-11eb-8def-b6aacd4b11e3.png)
-
-
 
 # workspace.vim (original Readme)
 
@@ -83,20 +89,20 @@ to manage large number of buffers by letting the user
 keep them grouped separately in workspaces.
 Similar to i3wm workspaces holding different windows.
 
-* Each tabpage represents a workspace.
-* It's like each workspace has it's own buffer list.
-* Workspaces are numbered starting with 1, like tabpages,
+- Each tabpage represents a workspace.
+- It's like each workspace has it's own buffer list.
+- Workspaces are numbered starting with 1, like tabpages,
   but a workspace number wouldn't change as other workspaces are opened and closed.
-* Third party buffer switchers should work as is.
-* The `hidden` option must be on.
+- Third party buffer switchers should work as is.
+- The `hidden` option must be on.
 
 ## Usage
 
-* `:WS n` will switch to workspace `n` (it is a number).
-* `:WSc [n]` will close current workspace or `n`.
-* `:WSmv n` will rename current workspace to `n` (again a number).
-* `:ls`, `:bn`, `:bp` will only operate on those buffers, which belong to the current workspace.
-* Use your favorite buffer switcher.
+- `:WS n` will switch to workspace `n` (it is a number).
+- `:WSc [n]` will close current workspace or `n`.
+- `:WSmv n` will rename current workspace to `n` (again a number).
+- `:ls`, `:bn`, `:bp` will only operate on those buffers, which belong to the current workspace.
+- Use your favorite buffer switcher.
 
 ## Useful addition to .vimrc
 
