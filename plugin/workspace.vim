@@ -40,7 +40,7 @@ endfunc
 
 function! WS_Close(WS)
     let tabnum = a:WS ? WS_Tabnum(a:WS) : tabpagenr()
-    if tabnum
+    if tabnum > 0
         exe "tabclose " . tabnum
     endif
 endfunc
@@ -51,7 +51,7 @@ function! WS_Backforth()
     endif
 endfunc
 
-function! WS_Empty(WS)
+function! s:empty(WS)
     let t = WS_Tabnum(a:WS)
     if tabpagewinnr(t, "$") != 1
         return v:false
@@ -73,8 +73,6 @@ function! WS_Line()
         let tWS = gettabvar(t, "WS")
         if t == tabpagenr()
             let tWS = "<" . tWS . ">"
-        elseif WS_Empty(tWS)
-            continue
         endif
         call add(st, tWS)
     endfor
@@ -94,6 +92,7 @@ function! WS_Rename(WS)
         call setbufvar(b.bufnr, "WS", a:WS)
     endfor
     let t:WS = a:WS
+    echo WS_Line()
 endfunc
 
 function! WS_Buffers(WS, ...)
@@ -141,6 +140,9 @@ endfunc
 " the t:WS variable to an available workspace number.
 " Expect other tabs to have beeen initialized.
 function! s:tabinit()
+    if get(t:, "WS")
+        return t:WS
+    endif
     let tabnum = tabpagenr()
     let WSp = gettabvar(tabnum - 1, "WS", 0)
     let WSn = gettabvar(tabnum + 1, "WS")
@@ -200,13 +202,22 @@ function! s:tableave()
     endfor
 endfunc
 
-function! s:tabenter()
-    if ! get(t:, "WS")
-        call s:tabinit()
+function! s:winenter()
+    let WS = s:tabinit()
+    " Are we switching workspace?
+    if WS != s:prev
+        for b in WS_Buffers(WS)
+            call s:buflisted(b.bufnr, 1)
+        endfor
+        if s:empty(s:prev)
+            call WS_Close(s:prev)
+        endif
     endif
-    for b in WS_Buffers(t:WS)
-        call s:buflisted(b.bufnr, 1)
-    endfor
+    let bnralt = bufnr("#")
+    " Reset alternate buffer, if it has been moved to other workspace
+    if bnralt > -1 && getbufvar(bnralt, "WS") != WS
+        let @# = bufnr("%")
+    endif
 endfunc
 
 function! s:bufadd(bnr)
@@ -268,9 +279,9 @@ endfunc
 
 augroup workspace
     autocmd!
-    autocmd TabEnter    * nested call s:tabenter()
     autocmd TabLeave    * nested call s:tableave()
     autocmd TabClosed   * nested call s:tabclosed()
+    autocmd WinEnter    * nested call s:winenter()
     "autocmd BufAdd     * nested call s:bufadd(expand("<abuf>"))
     autocmd BufEnter    * nested call s:bufenter()
 augroup end
@@ -286,6 +297,7 @@ function! s:init()
             call settabvar(t, "WS", t)
         endif
     endfor
+    let s:prev = t:WS
 endfunc
 
 call s:init()
