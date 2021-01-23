@@ -4,7 +4,7 @@
 " Author:    Olzvoi Bayasgalan <me@olzvoi.dev>
 " Home:      https://github.com/dosimple/workspace.vim
 " Version:   0.2
-" Copyright: Copyright (C) 2018 Olzvoi Bayasgalan
+" Copyright: Copyright (C) 2021 Olzvoi Bayasgalan
 " License:   VIM License
 "
 if exists('loaded_workspace')
@@ -15,6 +15,8 @@ let loaded_workspace = 1
 if v:version < 700
     finish
 endif
+
+let s:ws = {}
 
 " Open the workspace
 "
@@ -46,9 +48,7 @@ function! WS_Close(WS)
 endfunc
 
 function! WS_Backforth()
-    if get(s:, "prev")
-        call WS_Open(s:prev)
-    endif
+    call WS_Open(s:prev)
 endfunc
 
 function! s:empty(WS)
@@ -89,17 +89,60 @@ function! WS_Rename(WS)
     endif
     exe "tabmove " . WS_Tabnum(a:WS, 1)
     for b in WS_Buffers(t:WS, v:true)
-        call setbufvar(b.bufnr, "WS", a:WS)
+        call s:remove(t:WS, b)
+        call s:add(a:WS, b)
     endfor
-    let t:WS = a:WS
-    echo WS_Line()
+    let t:WS = a:WS+0
 endfunc
 
+func! s:b(b)
+    let b = a:b
+    if type(b) != v:t_dict
+        let b = getbufinfo(b)[0]
+    endif
+    if ! has_key(b.variables, "WS")
+        let b.variables.WS = []
+    endif
+    return b
+endfunc
+
+func! s:bws(b)
+    return s:b(a:b).variables.WS
+endfunc
+
+func! s:in(WS, b)
+    return index(s:bws(a:b), a:WS+0) >= 0
+endfunc
+
+func! s:add(WS, b)
+    let ws = s:bws(a:b)
+    if index(ws, a:WS+0) < 0
+        call add(ws, a:WS+0)
+        return 1
+    endif
+endfunc
+
+func! s:remove(WS, b)
+    let ws = s:bws(a:b)
+    let i = index(ws, a:WS+0)
+    if i >= 0
+        call remove(ws, i)
+        return 1
+    endif
+endfunc
+
+" Get listed buffer of a workspace.
+" Optionally include unlisted buffers by second argument.
 function! WS_Buffers(WS, ...)
     let all = get(a:, 1, v:false)
     let bs = []
     for b in getbufinfo()
-        if get(b.variables, "WS") == a:WS && (all || b.listed || get(b.variables, "WS_listed"))
+        let ws = s:bws(b)
+        if empty(ws) && b.loaded
+            echo "Taking orphaned buffer: " . b.name . ": " . b.bufnr
+            call add(ws, t:WS+0)
+        endif
+        if index(ws, a:WS+0) >= 0 && (all || b.listed || get(b.variables, "WS_listed"))
             call add(bs, b)
         endif
     endfor
@@ -107,10 +150,15 @@ function! WS_Buffers(WS, ...)
 endfunc
 
 function! WS_B_Move(to)
-    let bnr = bufnr("%")
+    if a:to == t:WS
+        return
+    end
+    let b = s:b("%")
     call s:buffer_alt_or_dummy()
+    call s:add(a:to, b)
+    call s:remove(t:WS, b)
     call WS_Open(a:to)
-    exe "buffer " . bnr
+    exe "buffer " . b.bufnr
 endfunc
 
 function! WS_Tabnum(WS, ...)
@@ -145,8 +193,8 @@ function! s:tabinit()
     endif
     let tabnum = tabpagenr()
     let WSp = gettabvar(tabnum - 1, "WS", 0)
-    let WSn = gettabvar(tabnum + 1, "WS")
-    let WS = ""
+    let WSn = gettabvar(tabnum + 1, "WS", 0)
+    let WS = 0
     if ! WSn || WSn - WSp > 1
         let WS = WSp + 1
     endif
@@ -161,7 +209,11 @@ function! s:tabinit()
         endfor
         exe 'tabmove ' . t
     endif
+    if ! WS || get(s:ws, WS)
+        throw "Workspace invalid or exists: " . WS
+    endif
     let t:WS = WS
+    let s:ws[WS] = 1
     return WS
 endfunc
 
@@ -176,30 +228,32 @@ function! s:buflisted(bufnum, listed)
 endfunc
 
 function! s:tabclosed()
+    let closed = 0
+    for i in keys(s:ws)
+        if ! WS_Tabnum(i)
+            let closed = i
+            break
+        end
+    endfor
+    if ! closed
+        throw "Closed workspace not found!"
+    endif
     for b in getbufinfo()
-        let WS = get(b.variables, "WS")
-        if WS && ! WS_Tabnum(WS)
+        if s:remove(closed, b) && empty(s:bws(b))
+            call s:add(t:WS, b)
             if get(b.variables, "WS_listed")
                 call s:buflisted(b.bufnr, 1)
             endif
-            call setbufvar(b.bufnr, "WS", "")
         endif
     endfor
-endfunc
-
-function! s:collect_orphans()
-    for b in getbufinfo()
-        if b.listed && ! get(b.variables, "WS")
-            call setbufvar(b.bufnr, "WS", t:WS)
-        endif
-    endfor
+    unlet s:ws[closed]
 endfunc
 
 function! s:tableave()
-    let s:prev = t:WS
     for b in WS_Buffers(t:WS)
         call s:buflisted(b.bufnr, 0)
     endfor
+    let s:prev = t:WS
 endfunc
 
 function! s:winenter()
@@ -215,14 +269,9 @@ function! s:winenter()
     endif
     let bnralt = bufnr("#")
     " Reset alternate buffer, if it has been moved to other workspace
-    if bnralt > -1 && getbufvar(bnralt, "WS") != WS
+    if bnralt > -1 && ! s:in(WS, bnralt)
         let @# = bufnr("%")
     endif
-endfunc
-
-function! s:bufadd(bnr)
-    " setbufvar doesn't work on BufAdd yet.
-    call setbufvar(a:bnr, "WS", t:WS)
 endfunc
 
 function! s:buffer_alt_or_dummy()
@@ -235,13 +284,14 @@ function! s:buffer_alt_or_dummy()
 endfunc
 
 function! s:bufenter()
-    let bnr = bufnr("%")
-    let bWS = get(b:, "WS")
-    if bWS && bWS != t:WS
+    let b = s:b("%")
+    " let ws = b.variables.WS
+    if v:false " && len(ws) && index(ws, t:WS) < 0
+        " TODO: Update this old and deactivated code
         " Disassociate the buffer from the windows of previous workspace
         let tabprev = WS_Tabnum(bWS)
         let winid = win_getid()
-        for wid in win_findbuf(bnr)
+        for wid in win_findbuf(b.bufnr)
             if tabprev == win_id2tabwin(wid)[0]
                 call win_gotoid(wid)
                 call s:buffer_alt_or_dummy()
@@ -249,12 +299,10 @@ function! s:bufenter()
         endfor
         call win_gotoid(winid)
     endif
-    let b:WS = t:WS
-    if getbufvar(bnr, "WS_listed")
-        call s:buflisted(bnr, 1)
+    call s:add(t:WS, b)
+    if get(b.variables, "WS_listed")
+        call s:buflisted(b.bufnr, 1)
     endif
-    " Workaround for BufAdd
-    call s:collect_orphans()
 endfunc
 
 function! s:bufdummy(create)
@@ -270,10 +318,7 @@ endfunc
 
 " Check, whether the buffer is dummy or empty scratch
 function! s:isbufdummy(b)
-    let b = a:b
-    if type(b) != v:t_dict
-        let b = getbufinfo(b)[0]
-    endif
+    let b = s:b(a:b)
     return ! b.changed && b.name == ""
 endfunc
 
@@ -282,7 +327,6 @@ augroup workspace
     autocmd TabLeave    * nested call s:tableave()
     autocmd TabClosed   * nested call s:tabclosed()
     autocmd WinEnter    * nested call s:winenter()
-    "autocmd BufAdd     * nested call s:bufadd(expand("<abuf>"))
     autocmd BufEnter    * nested call s:bufenter()
 augroup end
 
@@ -291,14 +335,11 @@ command! -nargs=? WSc call WS_Close("<args>")
 command! -nargs=1 WSmv call WS_Rename("<args>")
 command! -nargs=1 WSbmv call WS_B_Move("<args>")
 
-function! s:init()
+if empty(s:ws)
     for t in range(1, tabpagenr("$"))
-        if ! gettabvar(t, "WS")
-            call settabvar(t, "WS", t)
-        endif
+        let s:ws[t] = 1
+        call settabvar(t, "WS", t)
     endfor
     let s:prev = t:WS
-endfunc
-
-call s:init()
+endif
 
