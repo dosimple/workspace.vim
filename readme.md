@@ -1,15 +1,17 @@
 # workspace.vim
 
 The main purpose of this plugin is to make it easier
-to manage large number of buffers by letting the user
-keep them grouped separately in workspaces.
-Similar to i3wm workspaces holding different windows.
+to manage large number of buffers by keeping
+them grouped separately in workspaces.
 
-* Each tabpage represents a workspace.
-* It's like each workspace has it's own buffer list.
+* Each tabpage becomes a workspace with it's own buffer list.
 * Workspaces are numbered starting with 1, like tabpages,
-  but a workspace number wouldn't change as other workspaces are opened and closed.
+  but a workspace number wouldn't change as other
+  workspaces/tabpages are opened and closed.
 * Third party buffer switchers should work as is.
+
+## Requirements
+
 * The `hidden` option must be on.
 
 ## Usage
@@ -36,22 +38,23 @@ map <silent> <M-7> :WS 7<CR>
 map <silent> <M-8> :WS 8<CR>
 map <silent> <M-9> :WS 9<CR>
 map <silent> <M-0> :WS 10<CR>
-imap <M-1> <Esc><M-1>
-imap <M-2> <Esc><M-2>
-imap <M-3> <Esc><M-3>
-imap <M-4> <Esc><M-4>
-imap <M-5> <Esc><M-5>
-imap <M-6> <Esc><M-6>
-imap <M-7> <Esc><M-7>
-imap <M-8> <Esc><M-8>
-imap <M-9> <Esc><M-9>
-imap <M-0> <Esc><M-0>
+imap <M-1> <C-O><M-1>
+imap <M-2> <C-O><M-2>
+imap <M-3> <C-O><M-3>
+imap <M-4> <C-O><M-4>
+imap <M-5> <C-O><M-5>
+imap <M-6> <C-O><M-6>
+imap <M-7> <C-O><M-7>
+imap <M-8> <C-O><M-8>
+imap <M-9> <C-O><M-9>
+imap <M-0> <C-O><M-0>
 
 " Alternate between current and previous workspaces
 map <silent> <M-`> :call WS_Backforth()<CR>
-imap <M-`> <Esc><M-`>
+imap <M-`> <C-O><M-`>
 
-" Show info about workspaces
+" Show info line about workspaces
 map <silent> <F1> :echo WS_Line()<CR>
-imap <F1> <Esc><F1>
+imap <F1> <C-O><F1>
 ```
+

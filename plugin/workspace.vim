@@ -3,7 +3,7 @@
 " File:      workspace.vim
 " Author:    Olzvoi Bayasgalan <me@olzvoi.dev>
 " Home:      https://github.com/dosimple/workspace.vim
-" Version:   0.2
+" Version:   0.3
 " Copyright: Copyright (C) 2021 Olzvoi Bayasgalan
 " License:   VIM License
 "
@@ -92,7 +92,9 @@ function! WS_Rename(WS)
         call s:remove(t:WS, b)
         call s:add(a:WS, b)
     endfor
+    unlet s:ws[t:WS]
     let t:WS = a:WS+0
+    let s:ws[t:WS] = 1
 endfunc
 
 func! s:b(b)
@@ -335,7 +337,7 @@ command! -nargs=? WSc call WS_Close("<args>")
 command! -nargs=1 WSmv call WS_Rename("<args>")
 command! -nargs=1 WSbmv call WS_B_Move("<args>")
 
-if empty(s:ws)
+if ! get(s:, "prev")
     for t in range(1, tabpagenr("$"))
         let s:ws[t] = 1
         call settabvar(t, "WS", t)
