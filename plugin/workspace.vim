@@ -16,7 +16,9 @@ if v:version < 700
     finish
 endif
 
-let s:ws = {}
+if ! has_key(s:, 'ws')
+    let s:ws = {}
+end
 
 " Open the workspace
 "
@@ -100,9 +102,9 @@ endfunc
 func! s:b(b)
     let b = a:b
     if type(b) != v:t_dict
-        let b = getbufinfo(b)[0]
+        let b = get(getbufinfo(b), 0)
     endif
-    if ! has_key(b.variables, "WS")
+    if ! empty(b) && ! has_key(b.variables, "WS")
         let b.variables.WS = []
     endif
     return b
@@ -141,7 +143,7 @@ function! WS_Buffers(WS, ...)
     for b in getbufinfo()
         let ws = s:bws(b)
         if empty(ws) && b.loaded
-            echo "Taking orphaned buffer: " . b.name . ": " . b.bufnr
+            "echo "Found orphan buffer: " . b.name . ": " . b.bufnr
             call add(ws, t:WS+0)
         endif
         if index(ws, a:WS+0) >= 0 && (all || b.listed || get(b.variables, "WS_listed"))
@@ -154,7 +156,7 @@ endfunc
 function! WS_B_Move(to)
     if a:to == t:WS
         return
-    end
+    endif
     let b = s:b("%")
     call s:buffer_alt_or_dummy()
     call s:add(a:to, b)
