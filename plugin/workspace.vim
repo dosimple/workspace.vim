@@ -38,7 +38,6 @@ function! WS_Open(WS)
         call WS_Rename(a:WS)
         call s:bufdummy(0)
     endif
-    echo WS_Line()
     return ! tabnum
 endfunc
 
@@ -260,17 +259,20 @@ function! s:tableave()
     let s:prev = t:WS
 endfunc
 
+
+func! s:tabenter()
+    let WS = s:tabinit()
+    for b in WS_Buffers(WS)
+        call s:buflisted(b.bufnr, 1)
+    endfor
+    if s:empty(s:prev)
+        call WS_Close(s:prev)
+    endif
+    echo WS_Line()
+endfunc
+
 function! s:winenter()
     let WS = s:tabinit()
-    " Are we switching workspace?
-    if WS != s:prev
-        for b in WS_Buffers(WS)
-            call s:buflisted(b.bufnr, 1)
-        endfor
-        if s:empty(s:prev)
-            call WS_Close(s:prev)
-        endif
-    endif
     let bnralt = bufnr("#")
     " Reset alternate buffer, if it has been moved to other workspace
     if bnralt > -1 && ! s:in(WS, bnralt)
@@ -330,6 +332,7 @@ augroup workspace
     autocmd!
     autocmd TabLeave    * nested call s:tableave()
     autocmd TabClosed   * nested call s:tabclosed()
+    autocmd TabEnter    * nested call s:tabenter()
     autocmd WinEnter    * nested call s:winenter()
     autocmd BufEnter    * nested call s:bufenter()
 augroup end
