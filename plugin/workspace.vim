@@ -96,6 +96,7 @@ func! WS_Rename(WS)
     unlet s:ws[t:WS]
     let t:WS = a:WS+0
     let s:ws[t:WS] = 1
+    call s:session_var()
 endfunc
 
 func! s:b(b)
@@ -134,6 +135,47 @@ func! s:remove(WS, b)
     endif
 endfunc
 
+" Update g:WS_Session variable.
+" It is saved in session to restore workspaces.
+func! s:session_var()
+    if stridx(&sessionoptions, "globals") < 0 || exists("g:SessionLoad")
+        return
+    endif
+    let sv = { "ws": [0], "bs": {} }
+    for t in range(1, tabpagenr("$"))
+        call add(sv.ws, gettabvar(t, "WS"))
+    endfor
+    for b in getbufinfo()
+        let ws = s:bws(b)
+        if ! empty(ws) && s:listed(b) && getbufvar(b.bufnr, "&buftype") == ""
+            let sv.bs[b.name] = ws
+        endif
+    endfor
+    let g:WS_Session = string(sv)
+endfunc
+
+func! s:session_load()
+    if ! exists("g:WS_Session")
+        return
+    endif
+    exe "let sv = " .. g:WS_Session
+    for t in range(1, tabpagenr("$"))
+        if t != tabpagenr()
+            call settabvar(t, "WS", sv.ws[t])
+        endif
+    endfor
+    call WS_Rename(sv.ws[tabpagenr()])
+    for fname in keys(sv.bs)
+        if ! bufexists(fname)
+            exe "badd " .. fnameescape(fname)
+        endif
+        let b = s:b(fname)
+        let b.variables.WS = sv.bs[fname]
+        call s:setlisted(b, s:in(t:WS, b))
+    endfor
+    unlet g:WS_Session
+endfunc
+
 " Get listed buffer of a workspace.
 " Optionally include unlisted buffers by second argument.
 func! WS_Buffers(WS, ...)
@@ -145,7 +187,7 @@ func! WS_Buffers(WS, ...)
             "echo "Found orphan buffer: " . b.name . ": " . b.bufnr
             call add(ws, t:WS+0)
         endif
-        if index(ws, a:WS+0) >= 0 && (all || b.listed || get(b.variables, "WS_listed"))
+        if index(ws, a:WS+0) >= 0 && (all || s:listed(b))
             call add(bs, b)
         endif
     endfor
@@ -162,6 +204,7 @@ func! WS_B_Move(to)
     call s:remove(t:WS, b)
     call WS_Open(a:to)
     exe "buffer " . b.bufnr
+    call s:session_var()
 endfunc
 
 func! WS_Tabnum(WS, ...)
@@ -217,17 +260,17 @@ func! s:tabinit()
     endif
     let t:WS = WS
     let s:ws[WS] = 1
+    call s:session_var()
     return WS
 endfunc
 
-func! s:buflisted(bufnum, listed)
-    if a:listed
-        call setbufvar(a:bufnum, "WS_listed", "")
-        call setbufvar(a:bufnum, "&buflisted", 1)
-    else
-        call setbufvar(a:bufnum, "WS_listed", 1)
-        call setbufvar(a:bufnum, "&buflisted", 0)
-    endif
+func! s:listed(b)
+    return a:b.listed || get(a:b.variables, "WS_Listed")
+endfunc
+
+func! s:setlisted(b, listed)
+    call setbufvar(a:b.bufnr, "&buflisted", a:listed)
+    call setbufvar(a:b.bufnr, "WS_Listed", ! a:listed)
 endfunc
 
 func! s:tabclosed()
@@ -244,17 +287,18 @@ func! s:tabclosed()
     for b in getbufinfo()
         if s:remove(closed, b) && empty(s:bws(b))
             call s:add(t:WS, b)
-            if get(b.variables, "WS_listed")
-                call s:buflisted(b.bufnr, 1)
+            if get(b.variables, "WS_Listed")
+                call s:setlisted(b, 1)
             endif
         endif
     endfor
     unlet s:ws[closed]
+    call s:session_var()
 endfunc
 
 func! s:tableave()
     for b in WS_Buffers(t:WS)
-        call s:buflisted(b.bufnr, 0)
+        call s:setlisted(b, 0)
     endfor
     let s:prev = t:WS
 endfunc
@@ -263,9 +307,9 @@ endfunc
 func! s:tabenter()
     let WS = s:tabinit()
     for b in WS_Buffers(WS)
-        call s:buflisted(b.bufnr, 1)
+        call s:setlisted(b, 1)
     endfor
-    if s:empty(s:prev)
+    if s:empty(s:prev) && ! exists("g:SessionLoad")
         call WS_Close(s:prev)
     endif
     echo WS_Line()
@@ -305,9 +349,11 @@ func! s:bufenter()
         endfor
         call win_gotoid(winid)
     endif
-    call s:add(t:WS, b)
-    if get(b.variables, "WS_listed")
-        call s:buflisted(b.bufnr, 1)
+    if s:add(t:WS, b)
+        call s:session_var()
+    endif
+    if get(b.variables, "WS_Listed")
+        call s:setlisted(b, 1)
     endif
 endfunc
 
@@ -335,6 +381,7 @@ augroup workspace
     autocmd TabEnter    * nested call s:tabenter()
     autocmd WinEnter    * nested call s:winenter()
     autocmd BufEnter    * nested call s:bufenter()
+    autocmd SessionLoadPost * nested call s:session_load()
 augroup end
 
 command! -nargs=1 WS call WS_Open("<args>")
