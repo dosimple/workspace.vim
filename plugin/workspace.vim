@@ -25,7 +25,7 @@ end
 " Return:   1   for workspace created new
 "           0   workspace exists
 "           -1  invalid workspace
-function! WS_Open(WS)
+func! WS_Open(WS)
     if a:WS < 1
         call s:warning("Workspace invalid.")
         return -1
@@ -41,18 +41,18 @@ function! WS_Open(WS)
     return ! tabnum
 endfunc
 
-function! WS_Close(WS)
+func! WS_Close(WS)
     let tabnum = a:WS ? WS_Tabnum(a:WS) : tabpagenr()
     if tabnum > 0
         exe "tabclose " . tabnum
     endif
 endfunc
 
-function! WS_Backforth()
+func! WS_Backforth()
     call WS_Open(s:prev)
 endfunc
 
-function! s:empty(WS)
+func! s:empty(WS)
     let t = WS_Tabnum(a:WS)
     if tabpagewinnr(t, "$") != 1
         return v:false
@@ -68,7 +68,7 @@ function! s:empty(WS)
     return len(bs) == 0 || s:isbufdummy(bs[0])
 endfunc
 
-function! WS_Line()
+func! WS_Line()
     let st = []
     for t in range(1, tabpagenr("$"))
         let tWS = gettabvar(t, "WS")
@@ -80,7 +80,7 @@ function! WS_Line()
     return " " . join(st, " | ")
 endfunc
 
-function! WS_Rename(WS)
+func! WS_Rename(WS)
     if a:WS == t:WS
         return
     endif
@@ -136,7 +136,7 @@ endfunc
 
 " Get listed buffer of a workspace.
 " Optionally include unlisted buffers by second argument.
-function! WS_Buffers(WS, ...)
+func! WS_Buffers(WS, ...)
     let all = get(a:, 1, v:false)
     let bs = []
     for b in getbufinfo()
@@ -152,7 +152,7 @@ function! WS_Buffers(WS, ...)
     return bs
 endfunc
 
-function! WS_B_Move(to)
+func! WS_B_Move(to)
     if a:to == t:WS
         return
     endif
@@ -164,7 +164,7 @@ function! WS_B_Move(to)
     exe "buffer " . b.bufnr
 endfunc
 
-function! WS_Tabnum(WS, ...)
+func! WS_Tabnum(WS, ...)
     let near = get(a:, 1, 0)
     for t in range(1, tabpagenr("$"))
         let tWS = gettabvar(t, "WS")
@@ -183,14 +183,14 @@ function! WS_Tabnum(WS, ...)
     endif
 endfunc
 
-function! s:warning(msg)
+func! s:warning(msg)
     echohl WarningMsg | echo a:msg | echohl None
 endfunc
 
 " Initialize current tabpage, by populating
 " the t:WS variable to an available workspace number.
-" Expect other tabs to have beeen initialized.
-function! s:tabinit()
+" Expect other tabs to have been initialized.
+func! s:tabinit()
     if get(t:, "WS")
         return t:WS
     endif
@@ -220,7 +220,7 @@ function! s:tabinit()
     return WS
 endfunc
 
-function! s:buflisted(bufnum, listed)
+func! s:buflisted(bufnum, listed)
     if a:listed
         call setbufvar(a:bufnum, "WS_listed", "")
         call setbufvar(a:bufnum, "&buflisted", 1)
@@ -230,7 +230,7 @@ function! s:buflisted(bufnum, listed)
     endif
 endfunc
 
-function! s:tabclosed()
+func! s:tabclosed()
     let closed = 0
     for i in keys(s:ws)
         if ! WS_Tabnum(i)
@@ -252,7 +252,7 @@ function! s:tabclosed()
     unlet s:ws[closed]
 endfunc
 
-function! s:tableave()
+func! s:tableave()
     for b in WS_Buffers(t:WS)
         call s:buflisted(b.bufnr, 0)
     endfor
@@ -271,7 +271,7 @@ func! s:tabenter()
     echo WS_Line()
 endfunc
 
-function! s:winenter()
+func! s:winenter()
     let WS = s:tabinit()
     let bnralt = bufnr("#")
     " Reset alternate buffer, if it has been moved to other workspace
@@ -280,7 +280,7 @@ function! s:winenter()
     endif
 endfunc
 
-function! s:buffer_alt_or_dummy()
+func! s:buffer_alt_or_dummy()
     let alt = bufnr("#")
     if alt > -1 && alt != bufnr("%")
         buffer #
@@ -289,7 +289,7 @@ function! s:buffer_alt_or_dummy()
     endif
 endfunc
 
-function! s:bufenter()
+func! s:bufenter()
     let b = s:b("%")
     " let ws = b.variables.WS
     if v:false " && len(ws) && index(ws, t:WS) < 0
@@ -311,7 +311,7 @@ function! s:bufenter()
     endif
 endfunc
 
-function! s:bufdummy(create)
+func! s:bufdummy(create)
     if a:create
         enew
     endif
@@ -323,7 +323,7 @@ function! s:bufdummy(create)
 endfunc
 
 " Check, whether the buffer is dummy or empty scratch
-function! s:isbufdummy(b)
+func! s:isbufdummy(b)
     let b = s:b(a:b)
     return ! b.changed && b.name == ""
 endfunc
