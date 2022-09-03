@@ -10,9 +10,11 @@ them grouped separately in workspaces.
   workspaces/tabpages are opened and closed.
 * Third party buffer switchers should work as is.
 
-## Requirements
+## Installation
 
-* The `hidden` option must be on.
+* Copy workspace.vim file to vim plugin directory.
+* Enable `hidden` option.
+* Add `globals` to `sessionoptions` option (for session saving/loading).
 
 ## Usage
 

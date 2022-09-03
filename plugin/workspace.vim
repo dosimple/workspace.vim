@@ -335,20 +335,6 @@ endfunc
 
 func! s:bufenter()
     let b = s:b("%")
-    " let ws = b.variables.WS
-    if v:false " && len(ws) && index(ws, t:WS) < 0
-        " TODO: Update this old and deactivated code
-        " Disassociate the buffer from the windows of previous workspace
-        let tabprev = WS_Tabnum(bWS)
-        let winid = win_getid()
-        for wid in win_findbuf(b.bufnr)
-            if tabprev == win_id2tabwin(wid)[0]
-                call win_gotoid(wid)
-                call s:buffer_alt_or_dummy()
-            endif
-        endfor
-        call win_gotoid(winid)
-    endif
     if s:add(t:WS, b)
         call s:session_var()
     endif
