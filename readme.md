@@ -18,10 +18,13 @@ them grouped separately in workspaces.
 
 ## Usage
 
-* `:WS n` will switch to workspace `n` (it is a number).
-* `:WSc [n]` will close current workspace or `n`.
-* `:WSmv n` will rename current workspace to `n` (again a number).
-* `:WSbmv n` will move current buffer to workspace `n`.
+* `:WS n` Switch to workspace `n` (it is a number).
+* `:WSc [n]` Close current workspace or `n`.
+* `:WSmv n` Rename current workspace to `n` (again a number).
+* `:WSbmv n` Move current buffer to workspace `n`.
+* `:WSbrm [n]` Remove buffer from current workspace.
+  Or delete it, if it is open in only current workspace.
+  It preserves windows layout.
 * `:ls`, `:bn`, `:bp` will only operate on those buffers, which belong to the current workspace.
 * Use your favorite buffer switcher.
 

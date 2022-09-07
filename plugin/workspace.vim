@@ -207,6 +207,34 @@ func! WS_B_Move(to)
     call s:session_var()
 endfunc
 
+" Remove buffer (current or given) from workspace (current, number, or 0 for all workspaces).
+" Or delete, if it is open in only one workspace.
+" Return: true for success
+func! WS_B_Remove(...)
+    let b = s:b(get(a:, 1))
+    let WS = get(a:, 2, t:WS)
+    if empty(b)
+        call s:warning("Buffer not found!")
+        return
+    endif
+    let tab = tabpagenr()
+    let removed = v:true
+    for t in WS == 0 ? range(1, tabpagenr('$')) : [WS_Tabnum(WS)]
+        if index(tabpagebuflist(t), b.bufnr) > -1
+            exe 'tabmove ' .. t
+            call s:buffer_alt_or_dummy(b.bufnr)
+        endif
+        if len(b.variables.WS) > 1
+            let removed = removed && s:remove(gettabvar(t, "WS"), b)
+        else
+            exe "bdelete " .. b.bufnr
+            return bufloaded(b.bufnr)
+        endif
+    endfor
+    exe 'tabmove ' .. tab
+    return removed
+endfunc
+
 func! WS_Tabnum(WS, ...)
     let near = get(a:, 1, 0)
     for t in range(1, tabpagenr("$"))
@@ -324,13 +352,31 @@ func! s:winenter()
     endif
 endfunc
 
-func! s:buffer_alt_or_dummy()
+" Free current window of current buffer
+func! s:alt_or_dummy()
+    let buf = bufnr("%")
     let alt = bufnr("#")
-    if alt > -1 && alt != bufnr("%")
+    if alt > 0 && alt != buf
         buffer #
     else
+        bprevious
+    endif
+    if bufnr("%") != buf
         call s:bufdummy(1)
     endif
+endfunc
+
+" Free all windows of the buffer
+func! s:buffer_alt_or_dummy(...)
+    let buf = bufnr(get(a:, 1, "%"))
+    let win = winnr()
+    for w in range(1, winnr("$"))
+        if buf == winbufnr(w)
+            exe w .. "wincmd w"
+            call s:alt_or_dummy()
+        endif
+    endfor
+    exe win .. "wincmd w"
 endfunc
 
 func! s:bufenter()
@@ -374,6 +420,7 @@ command! -nargs=1 WS call WS_Open("<args>")
 command! -nargs=? WSc call WS_Close("<args>")
 command! -nargs=1 WSmv call WS_Rename("<args>")
 command! -nargs=1 WSbmv call WS_B_Move("<args>")
+command! -nargs=? WSbrm call WS_B_Remove("<args>")
 
 if ! get(s:, "prev")
     for t in range(1, tabpagenr("$"))
