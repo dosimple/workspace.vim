@@ -93,10 +93,23 @@ func! WS_Rename(WS)
         call s:remove(t:WS, b)
         call s:add(a:WS, b)
     endfor
-    unlet s:ws[t:WS]
-    let t:WS = a:WS+0
-    let s:ws[t:WS] = 1
+    call s:renumber(tabpagenr(), a:WS)
     call s:session_var()
+endfunc
+
+func! s:renumber(t, n)
+    let WS = gettabvar(a:t, "WS")
+    if WS == a:n
+        return
+    endif
+    if has_key(s:ws, a:n)
+        throw "Workspace exists: " .. a:n
+    endif
+    if has_key(s:ws, WS)
+        unlet s:ws[WS]
+    endif
+    call settabvar(a:t, "WS", a:n+0)
+    let s:ws[a:n] = 1
 endfunc
 
 func! s:b(b)
@@ -159,11 +172,12 @@ func! s:session_load()
         return
     endif
     exe "let sv = " .. g:WS_Session
-    for t in range(1, tabpagenr("$"))
+    for t in range(tabpagenr("$"), 1, -1)
         if t != tabpagenr()
-            call settabvar(t, "WS", sv.ws[t])
+            call s:renumber(t, sv.ws[t])
         endif
     endfor
+    " To accomodate existing buffers proir
     call WS_Rename(sv.ws[tabpagenr()])
     for fname in keys(sv.bs)
         if ! bufexists(fname)
