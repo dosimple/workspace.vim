@@ -1,10 +1,10 @@
-" Workspace (as in i3wm) for Vim
+" Workspace for Vim
 " --------------------------
 " File:      workspace.vim
 " Author:    Olzvoi Bayasgalan <me@olzvoi.dev>
 " Home:      https://github.com/dosimple/workspace.vim
-" Version:   0.3
-" Copyright: Copyright (C) 2021 Olzvoi Bayasgalan
+" Version:   0.4
+" Copyright: Copyright (C) 2022 Olzvoi Bayasgalan
 " License:   VIM License
 "
 if exists('loaded_workspace')
@@ -24,11 +24,9 @@ end
 "
 " Return:   1   for workspace created new
 "           0   workspace exists
-"           -1  invalid workspace
 func! WS_Open(WS)
     if a:WS < 1
-        call s:warning("Workspace invalid.")
-        return -1
+        throw "Workspace invalid: " .. a:WS
     endif
     let tabnum = WS_Tabnum(a:WS)
     if tabnum
@@ -177,7 +175,7 @@ func! s:session_load()
             call s:renumber(t, sv.ws[t])
         endif
     endfor
-    " To accomodate existing buffers proir
+    " To accomodate existing buffers proir to loading session
     call WS_Rename(sv.ws[tabpagenr()])
     for fname in keys(sv.bs)
         if ! bufexists(fname)
@@ -196,12 +194,11 @@ func! WS_Buffers(WS, ...)
     let all = get(a:, 1, v:false)
     let bs = []
     for b in getbufinfo()
-        let ws = s:bws(b)
-        if empty(ws) && b.loaded
+        if empty(s:bws(b)) && b.loaded
             "echo "Found orphan buffer: " . b.name . ": " . b.bufnr
-            call add(ws, t:WS+0)
+            call s:add(t:WS, b)
         endif
-        if index(ws, a:WS+0) >= 0 && (all || s:listed(b))
+        if s:in(a:WS, b) && (all || s:listed(b))
             call add(bs, b)
         endif
     endfor
@@ -345,9 +342,8 @@ func! s:tableave()
     let s:prev = t:WS
 endfunc
 
-
 func! s:tabenter()
-    let WS = s:tabinit()
+    let WS = t:WS
     for b in WS_Buffers(WS)
         call s:setlisted(b, 1)
     endfor

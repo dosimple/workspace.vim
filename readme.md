@@ -1,14 +1,17 @@
 # workspace.vim
 
-The main purpose of this plugin is to make it easier
+**This plugin gives each tabpage it's own buffer list.**
+
+The idea is to make it easier
 to manage large number of buffers by keeping
 them grouped separately in workspaces.
 
-* Each tabpage becomes a workspace with it's own buffer list.
+* Each tabpage represents a workspace with it's own buffer list.
 * Workspaces are numbered starting with 1, like tabpages,
-  but a workspace number wouldn't change as other
-  workspaces/tabpages are opened and closed.
-* Third party buffer switchers should work as is.
+  but their numbers remain static as they are opened and closed
+  — don't conflate these two sets of numbers.
+* `:ls`, `:bn`, `:bp` will use buffers from current workspace.
+  Third party buffer switchers should work as is.
 
 ## Installation
 
@@ -18,15 +21,15 @@ them grouped separately in workspaces.
 
 ## Usage
 
-* `:WS n` Switch to workspace `n` (it is a number).
-* `:WSc [n]` Close current workspace or `n`.
-* `:WSmv n` Rename current workspace to `n` (again a number).
-* `:WSbmv n` Move current buffer to workspace `n`.
-* `:WSbrm [n]` Remove buffer from current workspace.
-  Or delete it, if it is open in only current workspace.
-  It preserves windows layout.
-* `:ls`, `:bn`, `:bp` will only operate on those buffers, which belong to the current workspace.
-* Use your favorite buffer switcher.
+| Command       | Description                               |
+|---------------|-------------------------------------------|
+| `:WS n`       | Switch to workspace `n` (it is a number). Create it, when necessary. |
+| `:WSc [n]`    | Close current workspace or `n`.           |
+| `:WSmv n`     | Rename current workspace to `n`. |
+| `:WSbmv n`    | Move current buffer to workspace `n`.     |
+| `:WSbrm [n]`  | Remove buffer from current workspace. Or delete it, if it is open in only current workspace. |
+
+All commands try to preserve window layout, while handling buffers.
 
 ## Useful addition to .vimrc
 
