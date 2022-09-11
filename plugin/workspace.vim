@@ -158,7 +158,7 @@ func! s:session_var()
     endfor
     for b in getbufinfo()
         let ws = s:bws(b)
-        if ! empty(ws) && s:listed(b) && getbufvar(b.bufnr, "&buftype") == ""
+        if ! empty(ws) && s:listed(b) && getbufvar(b.bufnr, "&buftype") == "" && b.name != ""
             let sv.bs[b.name] = ws
         endif
     endfor
@@ -347,10 +347,12 @@ func! s:tabenter()
     for b in WS_Buffers(WS)
         call s:setlisted(b, 1)
     endfor
-    if s:empty(s:prev) && ! exists("g:SessionLoad")
-        call WS_Close(s:prev)
+    if ! exists("g:SessionLoad")
+        if s:empty(s:prev)
+            call WS_Close(s:prev)
+        endif
+        echo WS_Line()
     endif
-    echo WS_Line()
 endfunc
 
 func! s:winenter()
@@ -371,7 +373,7 @@ func! s:alt_or_dummy()
     else
         bprevious
     endif
-    if bufnr("%") != buf
+    if bufnr("%") == buf
         call s:bufdummy(1)
     endif
 endfunc
@@ -399,6 +401,12 @@ func! s:bufenter()
     endif
 endfunc
 
+func! s:bufunload(f)
+    let b = s:b(a:f)
+    unlet b.variables.WS
+    call s:session_var()
+endfunc
+
 func! s:bufdummy(create)
     if a:create
         enew
@@ -407,7 +415,7 @@ func! s:bufdummy(create)
     setl nobuflisted
     setl noswapfile
     setl bufhidden=wipe
-    "setl buftype=nofile
+    setl buftype=nofile
 endfunc
 
 " Check, whether the buffer is dummy or empty scratch
@@ -423,6 +431,7 @@ augroup workspace
     autocmd TabEnter    * nested call s:tabenter()
     autocmd WinEnter    * nested call s:winenter()
     autocmd BufEnter    * nested call s:bufenter()
+    autocmd BufUnload   * nested call s:bufunload(expand("<afile>"))
     autocmd SessionLoadPost * nested call s:session_load()
 augroup end
 
