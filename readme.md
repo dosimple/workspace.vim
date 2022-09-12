@@ -15,7 +15,7 @@ them grouped separately in workspaces.
 
 ## Installation
 
-* Copy workspace.vim file to vim plugin directory.
+* Copy `workspace.vim` file to vim plugin directory.
 * Enable `hidden` option.
 * Add `globals` to `sessionoptions` option (for session saving/loading).
 
@@ -62,7 +62,7 @@ map <silent> <M-`> :call WS_Backforth()<CR>
 imap <M-`> <C-O><M-`>
 
 " Show info line about workspaces
-map <silent> <F1> :echo WS_Line()<CR>
+map <silent> <F1> :call WS_Line()<CR>
 imap <F1> <C-O><F1>
 ```
 

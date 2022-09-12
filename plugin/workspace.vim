@@ -32,7 +32,7 @@ func! WS_Open(WS)
     if tabnum
         exe "tabnext " . tabnum
     else
-        exe WS_Tabnum(a:WS, 1) . "tabnew"
+        silent exe WS_Tabnum(a:WS, 1) . "tabnew"
         call WS_Rename(a:WS)
         call s:bufdummy(0)
     endif
@@ -67,15 +67,18 @@ func! s:empty(WS)
 endfunc
 
 func! WS_Line()
-    let st = []
     for t in range(1, tabpagenr("$"))
         let tWS = gettabvar(t, "WS")
         if t == tabpagenr()
-            let tWS = "<" . tWS . ">"
+            echon " "
+            echohl PmenuSel
+            echon " " tWS " "
+            echohl None
+            echon " "
+        else
+            echon " " tWS " "
         endif
-        call add(st, tWS)
     endfor
-    return " " . join(st, " | ")
 endfunc
 
 func! WS_Rename(WS)
@@ -93,6 +96,7 @@ func! WS_Rename(WS)
     endfor
     call s:renumber(tabpagenr(), a:WS)
     call s:session_var()
+    call WS_Line()
 endfunc
 
 func! s:renumber(t, n)
@@ -176,7 +180,7 @@ func! s:session_load()
         endif
     endfor
     " To accomodate existing buffers proir to loading session
-    call WS_Rename(sv.ws[tabpagenr()])
+    silent call WS_Rename(sv.ws[tabpagenr()])
     for fname in keys(sv.bs)
         if ! bufexists(fname)
             exe "badd " .. fnameescape(fname)
@@ -239,7 +243,7 @@ func! WS_B_Remove(...)
             let removed = removed && s:remove(gettabvar(t, "WS"), b)
         else
             exe "bdelete " .. b.bufnr
-            return bufloaded(b.bufnr)
+            return ! bufloaded(b.bufnr)
         endif
     endfor
     exe 'tabmove ' .. tab
@@ -351,7 +355,7 @@ func! s:tabenter()
         if s:empty(s:prev)
             call WS_Close(s:prev)
         endif
-        echo WS_Line()
+        call WS_Line()
     endif
 endfunc
 
