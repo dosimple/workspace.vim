@@ -372,7 +372,7 @@ endfunc
 func! s:alt_or_dummy()
     let buf = bufnr("%")
     let alt = bufnr("#")
-    if alt > 0 && alt != buf
+    if alt > 0 && alt != buf && buflisted(alt)
         buffer #
     else
         bprevious
