@@ -18,6 +18,7 @@ endif
 
 if ! has_key(s:, 'ws')
     let s:ws = {}
+    let s:silent = v:false
 end
 
 " Open the workspace
@@ -67,6 +68,10 @@ func! s:empty(WS)
 endfunc
 
 func! WS_Line()
+    if s:silent
+        return
+    endif
+    echo ""
     for t in range(1, tabpagenr("$"))
         let tWS = gettabvar(t, "WS")
         if t == tabpagenr()
@@ -198,7 +203,7 @@ func! WS_Buffers(WS, ...)
     let all = get(a:, 1, v:false)
     let bs = []
     for b in getbufinfo()
-        if empty(s:bws(b)) && b.loaded
+        if empty(s:bws(b)) && b.loaded || b.listed && a:WS == t:WS && ! s:in(a:WS, b)
             "echo "Found orphan buffer: " . b.name . ": " . b.bufnr
             call s:add(t:WS, b)
         endif
@@ -234,19 +239,28 @@ func! WS_B_Remove(...)
     endif
     let tab = tabpagenr()
     let removed = v:true
-    for t in WS == 0 ? range(1, tabpagenr('$')) : [WS_Tabnum(WS)]
-        if index(tabpagebuflist(t), b.bufnr) > -1
-            exe 'tabmove ' .. t
-            call s:buffer_alt_or_dummy(b.bufnr)
-        endif
-        if len(b.variables.WS) > 1
-            let removed = removed && s:remove(gettabvar(t, "WS"), b)
-        else
-            exe "bdelete " .. b.bufnr
-            return ! bufloaded(b.bufnr)
-        endif
-    endfor
-    exe 'tabmove ' .. tab
+    let s:silent = v:true
+    try
+        for t in WS == 0 ? range(1, tabpagenr('$')) : [WS_Tabnum(WS)]
+            if index(tabpagebuflist(t), b.bufnr) > -1
+                exe 'tabnext ' .. t
+                call s:buffer_alt_or_dummy(b.bufnr)
+            endif
+            if ! bufloaded(b.bufnr)
+                break
+            endif
+            if len(s:bws(b)) > 1
+                let removed = removed && s:remove(gettabvar(t, "WS"), b)
+            else
+                exe "bdelete " .. b.bufnr
+                let removed = ! bufloaded(b.bufnr)
+                break
+            endif
+        endfor
+    finally
+        exe 'tabnext ' .. tab
+        let s:silent = v:false
+    endtry
     return removed
 endfunc
 
